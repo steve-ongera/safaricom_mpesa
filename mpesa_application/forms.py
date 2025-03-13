@@ -15,16 +15,11 @@ class CustomerRegistrationForm(forms.Form):
     )
     id_number = forms.CharField(
         max_length=8,
-        validators=[
-            RegexValidator(r'^\d{7,8}$', 'Enter a valid Kenyan ID number (7-8 digits).')
-        ],
+        
         widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'ID Number'})
     )
     phone_number = forms.CharField(
-        max_length=13,
-        validators=[
-            RegexValidator(r'^\+254\d{9}$', 'Enter a valid phone number (+254XXXXXXXXX).')
-        ],
+      
         widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': '+254XXXXXXXXX'})
     )
 

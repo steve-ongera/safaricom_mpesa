@@ -7,7 +7,7 @@ from django.contrib.auth.models import BaseUserManager
 from datetime import date
 
 class CustomUserManager(BaseUserManager):
-    def create_user(self, username, email, password=None, **extra_fields):
+    def create_user(self, username, email, password=None, id_number=None, phone_number=None, **extra_fields):
         if not email:
             raise ValueError('Users must have an email address')
         
@@ -16,7 +16,13 @@ class CustomUserManager(BaseUserManager):
             extra_fields['date_of_birth'] = date(1900, 1, 1)  # Default date
             
         email = self.normalize_email(email)
-        user = self.model(username=username, email=email, **extra_fields)
+        user = self.model(
+            username=username,
+            email=email,
+            id_number=id_number,  # Ensure ID number is saved
+            phone_number=phone_number,  # Ensure phone number is saved
+            **extra_fields
+        )
         user.set_password(password)
         user.save(using=self._db)
         return user
@@ -51,14 +57,11 @@ class User(AbstractUser):
     id_number = models.CharField(
         max_length=8, 
         unique=True, 
-        validators=[validate_kenyan_id],
-        help_text="National ID number",
         null=True,  # Make this nullable for superusers
         blank=True
     )
     phone_number = models.CharField(
-        max_length=13, 
-        validators=[phone_regex], 
+        max_length=13,  
         unique=True,
         null=True,  # Make this nullable for superusers
         blank=True

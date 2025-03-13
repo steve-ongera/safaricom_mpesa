@@ -62,6 +62,27 @@ from django.core.mail import send_mail
 from django.conf import settings
 from django.shortcuts import render, redirect
 
+import re
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.db import transaction
+from django.contrib import messages
+from django.core.mail import send_mail
+from django.conf import settings
+from django.shortcuts import render, redirect
+
+def normalize_phone_number(phone_number):
+    """Convert phone number to standard format starting with 254"""
+    phone_number = phone_number.strip().replace(" ", "").replace("-", "")  # Remove spaces and dashes
+    
+    if phone_number.startswith("+254"):
+        return "254" + phone_number[4:]
+    elif phone_number.startswith("07"):
+        return "254" + phone_number[1:]
+    elif phone_number.startswith("011"):
+        return "254" + phone_number[1:]
+    else:
+        return phone_number  # Assume it's already in correct format
+
 @login_required
 @user_passes_test(is_agent)
 def register_customer(request):
@@ -75,8 +96,8 @@ def register_customer(request):
                 with transaction.atomic():
                     # Get form data
                     id_number = user_form.cleaned_data['id_number']
-                    phone_number = user_form.cleaned_data['phone_number']  # Use as username
-                    email = user_form.cleaned_data['email']  # User's actual email
+                    phone_number = normalize_phone_number(user_form.cleaned_data['phone_number'])  # Normalize phone
+                    email = user_form.cleaned_data['email']
                     first_name = user_form.cleaned_data['first_name']
                     last_name = user_form.cleaned_data['last_name']
                     pin = account_form.cleaned_data['pin']  # Use as password
@@ -88,12 +109,15 @@ def register_customer(request):
 
                     # Create the user
                     user = User.objects.create_user(
-                        username=phone_number,  # Username is the phone number
-                        email=email,  # Email is what user entered
-                        password=pin,  # PIN is the password
+                        username=phone_number,  # Normalized phone as username
+                        email=email,  # User's actual email
+                        password=pin,  # PIN as password
                         first_name=first_name,
                         last_name=last_name,
-                        is_active=True
+                        id_number=id_number,  # Ensure ID number is saved
+                        phone_number=phone_number,  # Ensure phone number is saved
+                        is_active=True,
+                       
                     )
 
                     # Create M-PESA account
