@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Dashboard</title>
+</head>
+<body>
+    <h2>Welcome, {{ user.username }}</h2>
+    <p>Phone Number: {{ user.phone_number }}</p>
+
+    {% if mpesa_account %}
+        <p>M-Pesa Balance: Ksh {{ mpesa_account.balance }}</p>
+    {% else %}
+        <p>No M-Pesa account linked.</p>
+    {% endif %}
+
+    <a href="/">Logout</a>
+</body>
+</html>

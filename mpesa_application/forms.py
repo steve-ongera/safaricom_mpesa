@@ -27,6 +27,14 @@ class CustomerRegistrationForm(forms.Form):
         ],
         widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': '+254XXXXXXXXX'})
     )
+
+    email = forms.EmailField(
+        max_length=50,
+       
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'email'})
+    )
+    
+
     date_of_birth = forms.DateField(
         widget=forms.DateInput(attrs={
             'class': 'form-control', 

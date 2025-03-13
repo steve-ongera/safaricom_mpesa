@@ -71,6 +71,13 @@
                                     <div class="text-danger">{{ user_form.phone_number.errors }}</div>
                                     {% endif %}
                                 </div>
+
+                                <div class="mb-3">
+                                    <label for="{{ user_form.email.id_for_label }}">Email:</label>
+                                    {{ user_form.email }}
+                                    
+                                   
+                                </div>
                             </div>
                         </div>
                         

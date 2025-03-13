@@ -13,4 +13,8 @@ urlpatterns = [
     path('agent/transactions/', views.agent_transactions, name='agent_transactions'),
     path('agent/float/', views.agent_float, name='agent_float'),
     path('agent/initial-deposit/<int:account_id>/', views.initial_deposit, name='initial_deposit'),
+
+    #user views
+    path("login/", views.login_view, name="login"),
+    path("dashboard/", views.dashboard, name="dashboard"),
 ]

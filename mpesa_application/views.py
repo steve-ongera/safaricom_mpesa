@@ -55,6 +55,12 @@ def agent_dashboard(request):
 
     return render(request, 'agent/dashboard.html', context)
 
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.db import transaction
+from django.contrib import messages
+from django.core.mail import send_mail
+from django.conf import settings
+from django.shortcuts import render, redirect
 
 @login_required
 @user_passes_test(is_agent)
@@ -69,80 +75,60 @@ def register_customer(request):
                 with transaction.atomic():
                     # Get form data
                     id_number = user_form.cleaned_data['id_number']
-                    phone_number = user_form.cleaned_data['phone_number']
-                    date_of_birth = user_form.cleaned_data['date_of_birth']
+                    phone_number = user_form.cleaned_data['phone_number']  # Use as username
+                    email = user_form.cleaned_data['email']  # User's actual email
                     first_name = user_form.cleaned_data['first_name']
                     last_name = user_form.cleaned_data['last_name']
-                    pin = account_form.cleaned_data['pin']
-                    
-                    # Check if the phone is already registered
-                    if User.objects.filter(phone_number=phone_number).exists():
+                    pin = account_form.cleaned_data['pin']  # Use as password
+
+                    # Check if phone number (username) is already registered
+                    if User.objects.filter(username=phone_number).exists():
                         messages.error(request, "This phone number is already registered.")
                         return redirect('register_customer')
-                    
-                    # Check if this ID has too many phone lines
-                    active_lines = PhoneLine.objects.filter(
-                        id_number=id_number, 
-                        is_active=True
-                    ).count()
-                    
-                    if active_lines >= 5:
-                        messages.error(request, "This ID number already has 5 active phone lines.")
-                        return redirect('register_customer')
-                    
+
                     # Create the user
-                    username = phone_number.replace('+', '')  # Use phone number as username without +
-                    email = f"{username}@mpesa.example.com"  # Generate a placeholder email
-                    
                     user = User.objects.create_user(
-                        username=username,
-                        email=email,
-                        password=get_random_string(12),  # Generate a random password
+                        username=phone_number,  # Username is the phone number
+                        email=email,  # Email is what user entered
+                        password=pin,  # PIN is the password
                         first_name=first_name,
                         last_name=last_name,
-                        phone_number=phone_number,
-                        id_number=id_number,
-                        date_of_birth=date_of_birth,
-                        is_verified=True  # Agent-verified user
+                        is_active=True
                     )
-                    
+
                     # Create M-PESA account
                     account_number = generate_account_number()
-                    pin_hash = hash_pin(pin)
-                    
+
                     mpesa_account = MPesaAccount.objects.create(
                         user=user,
                         account_number=account_number,
-                        balance=Decimal('0.00'),
-                        pin_hash=pin_hash,
+                        balance=0.00,
+                        pin_hash=hash_pin(pin),
                         is_active=True
                     )
-                    
-                    # Register the phone line
-                    PhoneLine.objects.create(
-                        id_number=id_number,
-                        phone_number=phone_number,
-                        is_active=True
+
+                    # Send login details via email
+                    send_mail(
+                        subject="Your M-Pesa Account Details",
+                        message=f"Dear {first_name},\n\nYour M-Pesa account has been created.\nUsername: {phone_number}\nPassword: {pin}\n\nPlease log in and change your password.",
+                        from_email=settings.DEFAULT_FROM_EMAIL,
+                        recipient_list=[email],
+                        fail_silently=False,
                     )
-                    
-                    messages.success(request, f"Successfully registered customer {first_name} {last_name} with account number {account_number}")
+
+                    messages.success(request, f"Customer {first_name} {last_name} registered successfully. Login details sent to {email}.")
                     return redirect('registration_success', account_id=mpesa_account.id)
-                    
-            except ValidationError as e:
-                messages.error(request, str(e))
+
             except Exception as e:
                 messages.error(request, f"An error occurred: {str(e)}")
     else:
         user_form = CustomerRegistrationForm()
         account_form = MPesaAccountCreationForm()
     
-    context = {
-        'user_form': user_form,
-        'account_form': account_form,
-        'agent': request.user.agent_profile
-    }
-    
-    return render(request, 'agent/register_customer.html', context)
+    return render(request, 'agent/register_customer.html', {'user_form': user_form, 'account_form': account_form})
+
+
+
 
 @login_required
 @user_passes_test(is_agent)
@@ -490,3 +476,47 @@ def initial_deposit(request, account_id):
     }
     
     return render(request, 'agent/initial_deposit.html', context)
+
+from django.contrib.auth import authenticate, login
+from django.contrib import messages
+from django.shortcuts import render, redirect
+
+def login_view(request):
+    if request.method == "POST":
+        phone_number = request.POST.get("phone_number")
+        pin = request.POST.get("pin")
+
+        try:
+            # Check if the user exists
+            user = User.objects.get(username=phone_number)
+
+            # Authenticate the user
+            authenticated_user = authenticate(request, username=user.username, password=pin)
+
+            if authenticated_user is not None:
+                login(request, authenticated_user)
+                return redirect("dashboard")  # Redirect to the user's dashboard
+            else:
+                messages.error(request, "Invalid phone number or PIN")
+
+        except User.DoesNotExist:
+            messages.error(request, "Account with this phone number does not exist")
+
+    return render(request, "auth/login.html")
+
+
+
+
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
+
+@login_required
+def dashboard(request):
+    # Get the user's M-Pesa account (if exists)
+    mpesa_account = MPesaAccount.objects.select_related("user").filter(user=request.user).first()
+
+    context = {
+        "user": request.user,
+        "mpesa_account": mpesa_account,
+    }
+    return render(request, "auth/dashboard.html", context)
