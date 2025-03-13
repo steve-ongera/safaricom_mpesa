@@ -331,22 +331,21 @@ class Loan(models.Model):
     repayment_due_date = models.DateField()
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='PENDING')
     is_paid = models.BooleanField(default=False)
-    remaining_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    remaining_amount = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def save(self, *args, **kwargs):
-        print(f"Saving Loan: ID={self.id}, Remaining={self.remaining_amount}, Is Paid={self.is_paid}, Status={self.status}")
+        if self.remaining_amount is None or self.remaining_amount == 0.00:
+            self.remaining_amount = self.amount  # Ensure the initial remaining amount is correct
 
-        if self.remaining_amount is None:
-            self.remaining_amount = self.amount  # Only set if it's None (not 0.00)
-
-        if self.remaining_amount <= 0:
+        if self.remaining_amount > 0:
+            self.is_paid = False
+            self.status = "PENDING"  # Ensure status updates when payment is not fully done
+        elif self.remaining_amount <= 0:
             self.is_paid = True
             self.status = "REPAID"
-        else:
-            self.is_paid = False
-
+            
         super().save(*args, **kwargs)
 
 
