@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container">
+    <h2>Search Tenant Deposit</h2>
+    
+    <form method="get">
+        <div class="form-group">
+            <label for="phone_number">Enter Phone Number:</label>
+            <input type="text" id="phone_number" name="phone_number" class="form-control" placeholder="Enter phone number">
+        </div>
+        <button type="submit" class="btn btn-primary mt-2">Search</button>
+    </form>
+
+    {% if accounts %}
+        <h3 class="mt-4">Search Results:</h3>
+        <ul class="list-group">
+            {% for account in accounts %}
+                <li class="list-group-item">
+                    <strong>{{ account.user.get_full_name }}</strong> - {{ account.user.phone_number }}<br>
+                    Balance: KES {{ account.balance }}
+                    <a href="{% url 'initial_deposit' account.id %}" class="btn btn-success btn-sm float-right">Deposit</a>
+                </li>
+            {% endfor %}
+        </ul>
+    {% elif query %}
+        <p class="text-danger mt-3">No results found for "{{ query }}".</p>
+    {% endif %}
+</div>
+
+{% endblock %}

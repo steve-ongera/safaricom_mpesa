@@ -402,6 +402,23 @@ from .utils import generate_transaction_id
 
 @login_required
 @user_passes_test(is_agent)
+def search_tenant_deposit(request):
+    """Search for a customer's MPesa account by phone number."""
+    query = request.GET.get('phone_number')
+    accounts = None
+
+    if query:
+        accounts = MPesaAccount.objects.filter(user__phone_number__icontains=query)
+
+    context = {
+        'accounts': accounts,
+        'query': query
+    }
+    return render(request, 'agent/search_tenant_deposit.html', context)
+
+
+@login_required
+@user_passes_test(is_agent)
 def initial_deposit(request, account_id):
     """View for agents to deposit funds into a customer's M-Pesa account."""
     agent = request.user.agent_profile
@@ -587,19 +604,46 @@ def search_agents(request):
     return render(request, 'customer/search_agent.html')
 
 
-
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.contrib import messages
+from django.db import transaction
 from decimal import Decimal
 import random
 import string
-from .models import MPesaAccount, Agent
+from .models import MPesaAccount, Agent, Transaction
 
 def generate_unique_txn():
     """Generate a unique 10-character alphanumeric uppercase transaction ID."""
     return ''.join(random.choices(string.ascii_uppercase + string.digits, k=10))
+
+def calculate_withdrawal_fee(amount):
+    """Calculate withdrawal fee based on transaction amount."""
+    fee_structure = [
+        (50, 90, 0),
+        (91, 200, 12),
+        (201, 500, 15),
+        (501, 1000, 28),
+        (1001, 1500, 40),
+        (1501, 2500, 50),
+        (2501, 3500, 55),
+        (3501, 5000, 60),
+        (5001, 7500, 75),
+        (7501, 10000, 85),
+        (10001, 15000, 100),
+        (15001, 20000, 110),
+        (20001, 35000, 120),
+        (35001, 50000, 150),
+        (50001, 100000, 200),
+        (100001, 150000, 250),
+        (150001, 300000, 300),
+    ]
+    
+    for min_amount, max_amount, fee in fee_structure:
+        if min_amount <= amount <= max_amount:
+            return Decimal(fee)
+    return Decimal(0)  # Default fee (shouldn't happen)
 
 @login_required
 def withdraw_money(request, agent_id):
@@ -618,10 +662,14 @@ def withdraw_money(request, agent_id):
 
         try:
             amount = Decimal(amount)
-            if amount <= 0:
-                raise ValueError("Invalid amount.")
+            if amount < 50:
+                messages.error(request, "Minimum withdrawal amount is KES 50.")
+                return redirect('withdraw_money', agent_id=agent.id)
 
-            if amount > mpesa_account.balance:
+            fee = calculate_withdrawal_fee(amount)
+            total_deduction = amount + fee  # Amount to be deducted from customer's balance
+
+            if total_deduction > mpesa_account.balance:
                 messages.error(request, "Insufficient balance.")
                 return redirect('withdraw_money', agent_id=agent.id)
 
@@ -629,22 +677,38 @@ def withdraw_money(request, agent_id):
                 messages.error(request, "Agent does not have enough float balance.")
                 return redirect('withdraw_money', agent_id=agent.id)
 
-            # Perform the withdrawal
-            mpesa_account.balance -= amount
-            agent.float_balance -= amount
-            mpesa_account.save()
-            agent.save()
+            # Perform the withdrawal in an atomic transaction
+            with transaction.atomic():
+                mpesa_account.balance -= total_deduction
+                agent.float_balance -= amount  # Agent only loses the withdrawn amount, not the fee
+                mpesa_account.save()
+                agent.save()
 
-            # Generate unique transaction ID
-            txn_id = generate_unique_txn()
+                # Generate unique transaction ID
+                txn_id = generate_unique_txn()
 
-            messages.success(request, f"Withdrawal of KES {amount} successful. TXN ID: {txn_id}")
+                # Save transaction record
+                Transaction.objects.create(
+                    transaction_id=txn_id,
+                    transaction_type='WITHDRAWAL',
+                    sender=mpesa_account,
+                    receiver=None,  # No specific receiver for withdrawals
+                    agent=agent,
+                    amount=amount,
+                    fee=fee,
+                    status='COMPLETED',
+                    description=f"Withdrawal of KES {amount} (Fee: KES {fee}) by {customer.username} from agent {agent.business_name}"
+                )
+
+            messages.success(request, f"Withdrawal of KES {amount} successful. Fee: KES {fee}. TXN ID: {txn_id}")
             return redirect('search_agents')
 
         except (ValueError, TypeError):
             messages.error(request, "Invalid amount entered.")
 
     return render(request, 'customer/withdraw_money.html', {'agent': agent})
+
+
 
 from decimal import Decimal
 

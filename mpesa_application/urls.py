@@ -12,6 +12,7 @@ urlpatterns = [
     # These routes would be implemented in other view modules
     path('agent/transactions/', views.agent_transactions, name='agent_transactions'),
     path('agent/float/', views.agent_float, name='agent_float'),
+    path('search-tenant-deposit/', views.search_tenant_deposit, name='search_tenant_deposit'),
     path('agent/initial-deposit/<int:account_id>/', views.initial_deposit, name='initial_deposit'),
 
     #user views
