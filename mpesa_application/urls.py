@@ -23,5 +23,7 @@ urlpatterns = [
     path('withdraw/<int:agent_id>/', views.withdraw_money, name='withdraw_money'),
     path('send-money/', views.send_money, name='send_money'),
     path('check-recipient/', views.check_recipient, name='check_recipient'),
+    path("check-balance/", views.check_balance, name="check_balance"),
+    path("transaction-history/", views.transaction_history, name="transaction_history"),
 
 ]

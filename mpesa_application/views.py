@@ -665,18 +665,23 @@ def calculate_transaction_fee(amount):
     else:
         return Decimal(100)  # Flat fee for amounts above 10,000
 
-
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from .models import MPesaAccount
+from django.contrib.auth.models import User
+from .models import MPesaAccount, Transaction
 from decimal import Decimal
+import uuid
+
+def generate_transaction_id():
+    """Generate a unique transaction ID."""
+    return str(uuid.uuid4().hex[:12]).upper()
 
 @login_required
 def send_money(request):
     """Allow a customer to send money to another registered customer."""
     sender = request.user  # Logged-in user is the sender
-    
+
     try:
         sender_account = sender.mpesa_account  # Get sender's M-PESA account
     except MPesaAccount.DoesNotExist:
@@ -713,6 +718,18 @@ def send_money(request):
             sender_account.save()
             recipient_account.save()
 
+            # Save transaction in the database
+            transaction = Transaction.objects.create(
+                transaction_id=generate_transaction_id(),
+                transaction_type='TRANSFER',
+                sender=sender_account,
+                receiver=recipient_account,
+                amount=amount,
+                fee=transaction_fee,
+                status='COMPLETED',
+                description=f"Money transfer from {sender.username} to {recipient_user.username}"
+            )
+
             messages.success(request, f"Transaction successful! Sent KES {amount} to {recipient_user.get_full_name()} (Fee: KES {transaction_fee}).")
             return redirect('send_money')
 
@@ -720,6 +737,7 @@ def send_money(request):
             messages.error(request, "Invalid amount entered.")
 
     return render(request, 'customer/send_money.html')
+
 
 from django.http import JsonResponse
 from django.contrib.auth import get_user_model
@@ -738,3 +756,35 @@ def check_recipient(request):
         return JsonResponse({"name": recipient_user.get_full_name()})
     except User.DoesNotExist:
         return JsonResponse({"error": "No user found with this number"}, status=404)
+
+
+@login_required
+def check_balance(request):
+    """Display the logged-in user's M-Pesa balance."""
+    try:
+        mpesa_account = request.user.mpesa_account  # Get user's M-Pesa account
+        balance = mpesa_account.balance
+    except AttributeError:
+        balance = None  # If no account exists
+
+    return render(request, 'customer/check_balance.html', {'balance': balance})
+
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from .models import Transaction
+
+@login_required
+def transaction_history(request):
+    """Display the logged-in user's transaction history."""
+    try:
+        mpesa_account = request.user.mpesa_account  # Get the user's M-Pesa account
+        sent_transactions = Transaction.objects.filter(sender=mpesa_account).order_by("-timestamp")  # Transactions sent
+        received_transactions = Transaction.objects.filter(receiver=mpesa_account).order_by("-timestamp")  # Transactions received
+    except AttributeError:
+        sent_transactions = []
+        received_transactions = []
+
+    return render(request, 'customer/transaction_history.html', {
+        'sent_transactions': sent_transactions,
+        'received_transactions': received_transactions
+    })

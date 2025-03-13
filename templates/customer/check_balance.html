@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container">
+    <h2>Your Account Balance</h2>
+    {% if balance is not None %}
+        <p class="alert alert-success"><strong>Balance: KES {{ balance }}</strong></p>
+    {% else %}
+        <p class="alert alert-danger">You do not have an active M-Pesa account.</p>
+    {% endif %}
+</div>
+
+{% endblock %}

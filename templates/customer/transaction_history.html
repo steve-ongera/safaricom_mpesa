@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container">
+    <h2>Your Transaction History</h2>
+
+    {% if sent_transactions or received_transactions %}
+        <h4>Sent Transactions</h4>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Transaction ID</th>
+                    <th>Recipient</th>
+                    <th>Type</th>
+                    <th>Amount (KES)</th>
+                    <th>Fee (KES)</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for transaction in sent_transactions %}
+                <tr>
+                    <td>{{ transaction.transaction_id }}</td>
+                    <td>
+                        {% if transaction.receiver %}
+                            {{ transaction.receiver.user.get_full_name }}
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </td>
+                    <td>{{ transaction.get_transaction_type_display }}</td>
+                    <td>{{ transaction.amount }}</td>
+                    <td>{{ transaction.fee }}</td>
+                    <td>
+                        {% if transaction.status == "COMPLETED" %}
+                            <span class="text-success">{{ transaction.get_status_display }}</span>
+                        {% elif transaction.status == "PENDING" %}
+                            <span class="text-warning">{{ transaction.get_status_display }}</span>
+                        {% else %}
+                            <span class="text-danger">{{ transaction.get_status_display }}</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ transaction.timestamp }}</td>
+                    <td>{{ transaction.description }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="8" class="text-center">No sent transactions.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <h4>Received Transactions</h4>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Transaction ID</th>
+                    <th>Sender</th>
+                    <th>Type</th>
+                    <th>Amount (KES)</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for transaction in received_transactions %}
+                <tr>
+                    <td>{{ transaction.transaction_id }}</td>
+                    <td>{{ transaction.sender.user.get_full_name }}</td>
+                    <td>{{ transaction.get_transaction_type_display }}</td>
+                    <td>{{ transaction.amount }}</td>
+                    <td>
+                        {% if transaction.status == "COMPLETED" %}
+                            <span class="text-success">{{ transaction.get_status_display }}</span>
+                        {% elif transaction.status == "PENDING" %}
+                            <span class="text-warning">{{ transaction.get_status_display }}</span>
+                        {% else %}
+                            <span class="text-danger">{{ transaction.get_status_display }}</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ transaction.timestamp }}</td>
+                    <td>{{ transaction.description }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="text-center">No received transactions.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+    {% else %}
+        <p class="alert alert-warning">You have no transaction history.</p>
+    {% endif %}
+</div>
+
+{% endblock %}

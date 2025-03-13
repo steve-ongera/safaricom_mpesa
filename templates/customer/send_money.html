@@ -4,34 +4,28 @@
 <div class="container">
     <h2>Send Money</h2>
 
-    <form method="post">
+    <form method="post" action="">
         {% csrf_token %}
-    
 
-    <div class="form-group">
-        <label for="phone_number">Recipient Phone Number:</label>
-        <input type="text" id="phone_number" name="phone_number" class="form-control" placeholder="Enter recipient phone number" required>
-         <div id="recipient_info" class="mt-2"></div>  <!-- This will show the recipient name -->
+        <div class="form-group">
+            <label for="phone_number">Recipient Phone Number:</label>
+            <input type="text" id="phone_number" name="phone_number" class="form-control" placeholder="Enter recipient phone number" required>
+            <div id="recipient_info" class="mt-2"></div>  <!-- This will show the recipient name -->
+        </div>
 
-        <small id="recipient_name" class="text-success"></small>
-        <small id="recipient_error" class="text-danger"></small>
-    </div>
+        <div class="form-group">
+            <label for="amount">Amount:</label>
+            <input type="number" id="amount" name="amount" class="form-control" placeholder="Enter amount" required>
+        </div>
 
-    <div class="form-group">
-        <label for="amount">Amount:</label>
-        <input type="number" id="amount" class="form-control" placeholder="Enter amount">
-    </div>
-
-    <button  class="btn btn-primary mt-2">Send Money</button>
+        <button type="submit" class="btn btn-primary mt-2">Send Money</button>
+    </form>
 </div>
-</form>
-    
 
 <script>
     document.getElementById("phone_number").addEventListener("input", function() {
         let phoneNumber = this.value.trim();
-        
-        // Ensure we only check when 13 digits are entered
+
         if (phoneNumber.length === 12) {
             fetch(`/check-recipient/?phone_number=${phoneNumber}`, {
                 headers: { "X-Requested-With": "XMLHttpRequest" }
@@ -49,11 +43,9 @@
                 console.error("Error fetching recipient:", error);
             });
         } else {
-            // Clear the recipient info if input is not complete
             document.getElementById("recipient_info").innerHTML = "";
         }
     });
-    </script>
-    
+</script>
 
 {% endblock %}
