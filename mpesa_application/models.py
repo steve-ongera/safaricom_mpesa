@@ -336,16 +336,20 @@ class Loan(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def save(self, *args, **kwargs):
-        if self.remaining_amount is None or self.remaining_amount == 0.00:
-            self.remaining_amount = self.amount  # Ensure the initial remaining amount is correct
-
-        if self.remaining_amount > 0:
-            self.is_paid = False
-            self.status = "PENDING"  # Ensure status updates when payment is not fully done
-        elif self.remaining_amount <= 0:
+        # For new loans, set the remaining amount
+        if not self.pk or (self.remaining_amount is None or self.remaining_amount == Decimal('0.00')) and self.status != "REPAID":
+            self.remaining_amount = self.amount  # Only set initial amount if it's a new loan
+        
+        # Update status based on remaining amount
+        if self.remaining_amount <= Decimal('0.00'):
             self.is_paid = True
             self.status = "REPAID"
-            
+        else:
+            self.is_paid = False
+            # Only reset to PENDING if not already APPROVED
+            if self.status != "APPROVED" and self.status != "REJECTED":
+                self.status = "PENDING"
+                
         super().save(*args, **kwargs)
 
 

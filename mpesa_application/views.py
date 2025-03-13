@@ -1207,18 +1207,21 @@ def repay_loan(request):
             print(f"Before update: Remaining Amount: {active_loan.remaining_amount}, Status: {active_loan.status}, Is Paid: {active_loan.is_paid}")
 
             # Update the loan balance
+            
             active_loan.remaining_amount = max(Decimal(0), active_loan.remaining_amount - amount)
 
             # If loan is fully repaid
-            if active_loan.remaining_amount == 0:
+            if active_loan.remaining_amount <= Decimal('0.00'):  # Use Decimal comparison for precision
                 active_loan.is_paid = True
                 active_loan.status = "REPAID"
+                print("Setting loan as REPAID")  # Add more debugging
 
-            active_loan.save(update_fields=["remaining_amount", "is_paid", "status"])  # Ensure only these fields are updated
-            active_loan.refresh_from_db()  # Reload from DB to check persistence
+            # Save all fields at once rather than specifying update_fields
+            active_loan.save()  
 
-            # Debugging: Print loan details after update
-            print(f"After update: Remaining Amount: {active_loan.remaining_amount}, Status: {active_loan.status}, Is Paid: {active_loan.is_paid}")
+            # Verify the changes were saved
+            active_loan.refresh_from_db()
+            print(f"After DB refresh: Remaining Amount: {active_loan.remaining_amount}, Status: {active_loan.status}, Is Paid: {active_loan.is_paid}")
 
             # Generate a **unique** transaction ID
             unique_id = uuid.uuid4().hex[:8]  # Generate a short unique ID
