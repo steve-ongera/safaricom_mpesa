@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="text-center">Initial Deposit for {{ customer.first_name }} {{ customer.last_name }}</h2>
+    <p class="text-center">Account Number: {{ account.account_number }}</p>
+    <p class="text-center">Current Balance: KES {{ account.balance }}</p>
+
+    <div class="card mx-auto" style="max-width: 500px;">
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                
+                <div class="form-group">
+                    <label for="amount">Deposit Amount (KES):</label>
+                    {{ form.amount }}
+                </div>
+
+                <button type="submit" class="btn btn-success btn-block mt-3">Deposit</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="text-center mt-3">
+        <a href="{% url 'agent_dashboard' %}" class="btn btn-secondary">Back to Dashboard</a>
+    </div>
+</div>
+{% endblock %}

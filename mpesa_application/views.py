@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth.decorators import login_required, user_passes_test 
+from django.contrib.auth import logout
 from django.contrib import messages
 from django.db import transaction
 from django.utils.crypto import get_random_string
@@ -389,26 +390,31 @@ def agent_float(request):
     
     return render(request, 'agent/float.html', context)
 
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib import messages
+from django.db import transaction
+from decimal import Decimal
+from .models import MPesaAccount, Transaction, AgentTransaction, Notification, Limit
+from .forms import InitialDepositForm
+from .utils import generate_transaction_id
+
+
 @login_required
 @user_passes_test(is_agent)
 def initial_deposit(request, account_id):
-    """View for agents to make initial deposit for new customer"""
+    """View for agents to deposit funds into a customer's M-Pesa account."""
     agent = request.user.agent_profile
     account = get_object_or_404(MPesaAccount, id=account_id)
-    
-    # For security, check the account is new with zero balance
-    if account.balance > 0:
-        messages.warning(request, "This account already has funds and is not eligible for initial deposit")
-        return redirect('agent_dashboard')
     
     if request.method == 'POST':
         form = InitialDepositForm(request.POST)
         if form.is_valid():
             amount = form.cleaned_data['amount']
             
-            # Check if agent has enough float
+            # Check if agent has enough float balance
             if agent.float_balance < amount:
-                messages.error(request, "Insufficient float balance to process this deposit")
+                messages.error(request, "Insufficient float balance to process this deposit.")
                 return redirect('initial_deposit', account_id=account_id)
             
             try:
@@ -422,19 +428,19 @@ def initial_deposit(request, account_id):
                     if deposit_limit and (amount < deposit_limit.min_amount or amount > deposit_limit.max_amount):
                         messages.error(
                             request, 
-                            f"Deposit amount must be between KES {deposit_limit.min_amount} and KES {deposit_limit.max_amount}"
+                            f"Deposit amount must be between KES {deposit_limit.min_amount} and KES {deposit_limit.max_amount}."
                         )
                         return redirect('initial_deposit', account_id=account_id)
                     
-                    # Create transaction
+                    # Generate unique transaction ID
                     txn_id = generate_transaction_id()
                     
-                    # Find or create the agent's own MPesa account 
+                    # Find or create the agent's MPesa account
                     agent_account, _ = MPesaAccount.objects.get_or_create(
                         user=agent.user,
                         defaults={
                             'account_number': f"AG{agent.business_number[-8:]}",
-                            'pin_hash': 'agent',  # In a real system, this would be properly secured
+                            'pin_hash': 'agent',  # Ideally, this should be encrypted securely
                             'is_active': True
                         }
                     )
@@ -447,15 +453,15 @@ def initial_deposit(request, account_id):
                         receiver=account,
                         agent=agent,
                         amount=amount,
-                        fee=Decimal('0.00'),  # No fee for initial deposit
+                        fee=Decimal('0.00'),  # No fee for deposits
                         status='COMPLETED',
-                        description=f"Initial deposit by agent {agent.business_name}"
+                        description=f"Deposit by agent {agent.business_name}"
                     )
                     
-                    # Calculate agent commission (usually none for initial deposit, but can be configured)
+                    # Calculate agent commission (usually none for deposits)
                     commission = Decimal('0.00')
                     
-                    # Create agent transaction record
+                    # Log agent's transaction
                     AgentTransaction.objects.create(
                         transaction=txn,
                         agent=agent,
@@ -464,26 +470,26 @@ def initial_deposit(request, account_id):
                         agent_commission=commission
                     )
                     
-                    # Update account balance
+                    # Update customer's account balance
                     account.balance += amount
                     account.save()
                     
-                    # Update agent float
+                    # Deduct from agent's float balance
                     agent.float_balance -= amount
                     agent.save()
                     
-                    # Create notification for customer
+                    # Send notification to customer
                     Notification.objects.create(
                         user=account.user,
                         notification_type='SMS',
                         title="M-PESA Deposit",
-                        message=f"Your M-PESA account has been credited with KES {amount}. New balance: KES {account.balance}. Thank you for using M-PESA!",
+                        message=f"Your M-PESA account has been credited with KES {amount}. New balance: KES {account.balance}.",
                         transaction=txn
                     )
                     
                     messages.success(
                         request, 
-                        f"Initial deposit of KES {amount} successfully processed. New account balance: KES {account.balance}"
+                        f"Deposit of KES {amount} successfully processed. New account balance: KES {account.balance}."
                     )
                     return redirect('agent_dashboard')
                     
@@ -500,6 +506,7 @@ def initial_deposit(request, account_id):
     }
     
     return render(request, 'agent/initial_deposit.html', context)
+
 
 from django.contrib.auth import authenticate, login
 from django.contrib import messages
@@ -519,7 +526,7 @@ def login_view(request):
 
             if authenticated_user is not None:
                 login(request, authenticated_user)
-                return redirect("dashboard")  # Redirect to the user's dashboard
+                return redirect("customer_dashboard")  # Redirect to the customer dashboard
             else:
                 messages.error(request, "Invalid phone number or PIN")
 
@@ -528,14 +535,17 @@ def login_view(request):
 
     return render(request, "auth/login.html")
 
-
+def user_logout(request):
+    """Logs out the user and redirects to the login page"""
+    logout(request)
+    return redirect('login')  # Redirect to your login page or home page
 
 
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 
 @login_required
-def dashboard(request):
+def customer_dashboard(request):
     # Get the user's M-Pesa account (if exists)
     mpesa_account = MPesaAccount.objects.select_related("user").filter(user=request.user).first()
 
@@ -543,4 +553,188 @@ def dashboard(request):
         "user": request.user,
         "mpesa_account": mpesa_account,
     }
-    return render(request, "auth/dashboard.html", context)
+    return render(request, "customer/customer_dashboard.html", context)
+
+
+
+from django.shortcuts import render
+from django.http import JsonResponse
+from django.contrib.auth.decorators import login_required
+from django.db.models import Q
+from .models import Agent
+@login_required
+def search_agents(request):
+    """Handle AJAX search requests and render the search page."""
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':  
+        query = request.GET.get('query', '').strip()
+        results = []
+
+        if query:
+            agents = Agent.objects.filter(Q(business_number__icontains=query) | Q(business_name__icontains=query))[:10]
+
+            results = [
+                {
+                    'id': agent.id, 
+                    'business_name': agent.business_name, 
+                    'business_number': agent.business_number,
+                    'withdraw_url': f"/withdraw/{agent.id}/"  # Link to withdraw money
+                }
+                for agent in agents
+            ]
+
+        return JsonResponse({'results': results})
+
+    return render(request, 'customer/search_agent.html')
+
+
+
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+from django.contrib import messages
+from decimal import Decimal
+import random
+import string
+from .models import MPesaAccount, Agent
+
+def generate_unique_txn():
+    """Generate a unique 10-character alphanumeric uppercase transaction ID."""
+    return ''.join(random.choices(string.ascii_uppercase + string.digits, k=10))
+
+@login_required
+def withdraw_money(request, agent_id):
+    """Allow a logged-in customer to withdraw money from a specific agent."""
+    agent = get_object_or_404(Agent, id=agent_id)
+    customer = request.user  # Get the logged-in user
+
+    try:
+        mpesa_account = customer.mpesa_account  # Get user's MPESA account
+    except MPesaAccount.DoesNotExist:
+        messages.error(request, "You don't have an active MPesa account.")
+        return redirect('search_agents')
+
+    if request.method == 'POST':
+        amount = request.POST.get('amount')
+
+        try:
+            amount = Decimal(amount)
+            if amount <= 0:
+                raise ValueError("Invalid amount.")
+
+            if amount > mpesa_account.balance:
+                messages.error(request, "Insufficient balance.")
+                return redirect('withdraw_money', agent_id=agent.id)
+
+            if amount > agent.float_balance:
+                messages.error(request, "Agent does not have enough float balance.")
+                return redirect('withdraw_money', agent_id=agent.id)
+
+            # Perform the withdrawal
+            mpesa_account.balance -= amount
+            agent.float_balance -= amount
+            mpesa_account.save()
+            agent.save()
+
+            # Generate unique transaction ID
+            txn_id = generate_unique_txn()
+
+            messages.success(request, f"Withdrawal of KES {amount} successful. TXN ID: {txn_id}")
+            return redirect('search_agents')
+
+        except (ValueError, TypeError):
+            messages.error(request, "Invalid amount entered.")
+
+    return render(request, 'customer/withdraw_money.html', {'agent': agent})
+
+from decimal import Decimal
+
+def calculate_transaction_fee(amount):
+    """Calculate the transaction fee based on amount being sent."""
+    amount = Decimal(amount)
+    
+    if amount < 100:
+        return Decimal(0)  # No fee for amounts less than 100
+    elif 101 <= amount <= 500:
+        return Decimal(7)
+    elif 501 <= amount <= 1000:
+        return Decimal(13)
+    elif 1001 <= amount <= 5000:
+        return Decimal(25)
+    elif 5001 <= amount <= 10000:
+        return Decimal(50)
+    else:
+        return Decimal(100)  # Flat fee for amounts above 10,000
+
+
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from .models import MPesaAccount
+from decimal import Decimal
+
+@login_required
+def send_money(request):
+    """Allow a customer to send money to another registered customer."""
+    sender = request.user  # Logged-in user is the sender
+    
+    try:
+        sender_account = sender.mpesa_account  # Get sender's M-PESA account
+    except MPesaAccount.DoesNotExist:
+        messages.error(request, "You don't have an active M-Pesa account.")
+        return redirect('send_money')
+
+    if request.method == 'POST':
+        phone_number = request.POST.get('phone_number')
+        amount = request.POST.get('amount')
+
+        try:
+            amount = Decimal(amount)
+
+            if amount <= 0:
+                raise ValueError("Invalid amount.")
+
+            # Fetch recipient's user object first
+            recipient_user = get_object_or_404(User, phone_number=phone_number)
+
+            # Fetch recipient's MPesa account
+            recipient_account = get_object_or_404(MPesaAccount, user=recipient_user)
+
+            # Calculate transaction fee
+            transaction_fee = calculate_transaction_fee(amount)
+            total_deduction = amount + transaction_fee  # Total deduction from sender
+
+            if total_deduction > sender_account.balance:
+                messages.error(request, "Insufficient balance for this transaction.")
+                return redirect('send_money')
+
+            # Perform the transaction
+            sender_account.balance -= total_deduction
+            recipient_account.balance += amount
+            sender_account.save()
+            recipient_account.save()
+
+            messages.success(request, f"Transaction successful! Sent KES {amount} to {recipient_user.get_full_name()} (Fee: KES {transaction_fee}).")
+            return redirect('send_money')
+
+        except (ValueError, TypeError):
+            messages.error(request, "Invalid amount entered.")
+
+    return render(request, 'customer/send_money.html')
+
+from django.http import JsonResponse
+from django.contrib.auth import get_user_model
+
+User = get_user_model()  # Get the correct User model
+
+def check_recipient(request):
+    """AJAX view to fetch recipient's name based on phone number."""
+    phone_number = request.GET.get('phone_number')
+
+    if not phone_number or len(phone_number) != 12:
+        return JsonResponse({"error": "Invalid phone number"}, status=400)
+
+    try:
+        recipient_user = User.objects.get(phone_number=phone_number)
+        return JsonResponse({"name": recipient_user.get_full_name()})
+    except User.DoesNotExist:
+        return JsonResponse({"error": "No user found with this number"}, status=404)

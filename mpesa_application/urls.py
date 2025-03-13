@@ -15,6 +15,13 @@ urlpatterns = [
     path('agent/initial-deposit/<int:account_id>/', views.initial_deposit, name='initial_deposit'),
 
     #user views
+
     path("login/", views.login_view, name="login"),
-    path("dashboard/", views.dashboard, name="dashboard"),
+    path('logout/', views.user_logout, name='logout'),
+    path("customer_dashboard/", views.customer_dashboard, name="customer_dashboard"),
+    path('search-agent/', views.search_agents, name='search_agents'),
+    path('withdraw/<int:agent_id>/', views.withdraw_money, name='withdraw_money'),
+    path('send-money/', views.send_money, name='send_money'),
+    path('check-recipient/', views.check_recipient, name='check_recipient'),
+
 ]

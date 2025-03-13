@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container">
+    <h2>Withdraw Money</h2>
+    <p>Withdraw from: <strong>{{ agent.business_name }}</strong> ({{ agent.business_number }})</p>
+
+    <form method="post">
+        {% csrf_token %}
+        <label for="amount">Enter Amount:</label>
+        <input type="number" name="amount" id="amount" class="form-control" required min="1">
+        <button type="submit" class="btn btn-primary mt-3">Withdraw</button>
+    </form>
+
+    <a href="{% url 'search_agents' %}" class="btn btn-secondary mt-2">Back to Search</a>
+</div>
+
+{% endblock %}

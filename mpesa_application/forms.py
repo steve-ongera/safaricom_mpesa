@@ -147,3 +147,15 @@ class InitialDepositForm(forms.Form):
         
         # Format to 2 decimal places
         return amount.quantize(Decimal('0.01'))
+    
+
+
+from django import forms
+
+class WithdrawalForm(forms.Form):
+    amount = forms.DecimalField(
+        max_digits=10, 
+        decimal_places=2, 
+        label="Amount to Withdraw",
+        min_value=50,  # Minimum withdrawal amount
+    )
