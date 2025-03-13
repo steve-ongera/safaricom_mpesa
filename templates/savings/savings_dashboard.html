@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+    <h2>My Savings Account</h2>
+
+    {% if messages %}
+        {% for message in messages %}
+            <p class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">{{ message }}</p>
+        {% endfor %}
+    {% endif %}
+
+    {% if savings_account %}
+        <p><strong>Account Number:</strong> {{ savings_account.account_number }}</p>
+        <p><strong>Balance:</strong> Ksh {{ savings_account.balance }}</p>
+        <p><strong>Date Created:</strong> {{ savings_account.created_at }}</p>
+
+        <a href="{% url 'deposit_savings' %}" class="btn btn-success">Deposit</a>
+        <a href="{% url 'withdraw_savings' %}" class="btn btn-danger">Withdraw</a>
+    {% else %}
+        <p>You do not have a savings account.</p>
+        <a href="{% url 'create_savings_account' %}" class="btn btn-primary">Create Savings Account</a>
+    {% endif %}
+</div>
+{% endblock %}

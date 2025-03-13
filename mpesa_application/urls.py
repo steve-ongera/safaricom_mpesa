@@ -27,4 +27,12 @@ urlpatterns = [
     path("check-balance/", views.check_balance, name="check_balance"),
     path("transaction-history/", views.transaction_history, name="transaction_history"),
 
+
+    #savings
+    path('create-savings/', views.create_savings_account, name='create_savings_account'),
+    path('savings-dashboard/', views.savings_dashboard, name='savings_dashboard'),
+    path('deposit/', views.deposit_savings, name='deposit_savings'),
+    path('withdraw/', views.withdraw_savings, name='withdraw_savings'),
+
+
 ]

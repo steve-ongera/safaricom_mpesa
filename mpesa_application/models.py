@@ -2,7 +2,7 @@ from django.db import models
 from django.core.validators import RegexValidator
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
-
+from decimal import Decimal
 from django.contrib.auth.models import BaseUserManager
 from datetime import date
 
@@ -86,6 +86,75 @@ class MPesaAccount(models.Model):
     
     def __str__(self):
         return f"Account: {self.account_number} - {self.user.phone_number}"
+
+
+from django.db import models
+from decimal import Decimal
+from django.core.validators import RegexValidator
+from django.core.exceptions import ValidationError
+from datetime import date
+from django.conf import settings  # Import the custom user model
+
+class SavingsAccount(models.Model):
+    """Model representing a user's savings account."""
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='savings_account')
+    account_number = models.CharField(max_length=10, unique=True, editable=False)  # Same as MPesaAccount
+    balance = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal('0.00'))
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    # Additional Fields
+    email = models.EmailField(max_length=255 , blank=True , null=True)
+    phone_number = models.CharField(max_length=13, blank=True , null=True)
+    id_number = models.CharField(max_length=8, blank=True , null=True)
+
+    # Next of Kin details
+    next_of_kin_name = models.CharField(max_length=255, blank=True , null=True)
+    next_of_kin_phone = models.CharField(max_length=13, blank=True , null=True)
+    next_of_kin_relationship = models.CharField(max_length=50 , blank=True , null=True)
+
+    def deposit(self, amount):
+        """Deposit money into the savings account."""
+        if amount > 0:
+            self.balance += amount
+            self.save()
+            return True
+        return False
+
+    def withdraw(self, amount):
+        """Withdraw money from the savings account if sufficient balance exists."""
+        if 0 < amount <= self.balance:
+            self.balance -= amount
+            self.save()
+            return True
+        return False
+
+    def transfer_to_mpesa(self, amount):
+        """Transfer funds from savings to MPesaAccount."""
+        if self.withdraw(amount):  
+            mpesa_account = self.user.mpesa_account  
+            mpesa_account.balance += amount
+            mpesa_account.save()
+            return True
+        return False
+
+    def __str__(self):
+        return f"{self.user.username} - {self.account_number}"
+
+    def save(self, *args, **kwargs):
+        """Fetch the account number from MPesaAccount when creating a savings account."""
+        if not self.account_number:
+            try:
+                self.account_number = self.user.mpesa_account.account_number  # Use MPesa account number
+            except AttributeError:
+                raise ValidationError("User must have an MPesa account before opening a savings account.")
+
+        # Auto-fill fields from the user model if available
+        self.email = self.user.email
+        self.phone_number = self.user.phone_number
+        self.id_number = self.user.id_number
+
+        super().save(*args, **kwargs)
+
 
 class Agent(models.Model):
     """Model for M-PESA agents who handle deposits and withdrawals"""

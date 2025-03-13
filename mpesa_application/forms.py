@@ -159,3 +159,12 @@ class WithdrawalForm(forms.Form):
         label="Amount to Withdraw",
         min_value=50,  # Minimum withdrawal amount
     )
+
+
+from django import forms
+from .models import SavingsAccount
+
+class SavingsAccountForm(forms.ModelForm):
+    class Meta:
+        model = SavingsAccount
+        fields = ['next_of_kin_name', 'next_of_kin_phone', 'next_of_kin_relationship']

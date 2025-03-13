@@ -852,3 +852,185 @@ def transaction_history(request):
         'sent_transactions': sent_transactions,
         'received_transactions': received_transactions
     })
+
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from .models import SavingsAccount, MPesaAccount
+from .forms import SavingsAccountForm  # Import the form
+
+@login_required
+def create_savings_account(request):
+    """Allow a logged-in user to create a savings account if they don’t have one."""
+    user = request.user
+
+    # Check if user already has a savings account
+    if hasattr(user, 'savings_account'):
+        messages.info(request, "You already have a savings account.")
+        return redirect('savings_dashboard')  # Redirect to savings dashboard
+
+    # Check if user has an MPesa account
+    try:
+        mpesa_account = user.mpesa_account
+    except MPesaAccount.DoesNotExist:
+        messages.error(request, "You need an MPesa account before opening a savings account.")
+        return redirect('customer_dashboard')  # Redirect to customer dashboard
+
+    if request.method == 'POST':
+        form = SavingsAccountForm(request.POST)
+        if form.is_valid():
+            savings_account = form.save(commit=False)
+            savings_account.user = user
+            savings_account.account_number = mpesa_account.account_number  # Auto-set MPesa account number
+
+            # Auto-fill fields from user model
+            savings_account.email = user.email
+            savings_account.phone_number = user.phone_number
+            savings_account.id_number = user.id_number
+
+            savings_account.save()
+            messages.success(request, "Savings account created successfully!")
+            return redirect('customer_dashboard')  # Redirect to customer dashboard
+        else:
+            messages.error(request, "Error creating savings account. Please check the details.")
+
+    else:
+        form = SavingsAccountForm()  # Empty form for GET request
+
+    return render(request, 'savings/create_savings.html', {'form': form})
+
+
+@login_required
+def savings_dashboard(request):
+    """Display the user's savings account details."""
+    user = request.user
+
+    # Check if user has a savings account
+    try:
+        savings_account = user.savings_account
+    except SavingsAccount.DoesNotExist:
+        messages.error(request, "You do not have a savings account. Please create one first.")
+        return redirect('create_savings_account')
+
+    return render(request, 'savings/savings_dashboard.html', {'savings_account': savings_account})
+
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from decimal import Decimal
+import uuid
+from .models import SavingsAccount, MPesaAccount, Transaction
+
+@login_required
+def deposit_savings(request):
+    """Allow the user to deposit money into their savings account from MPesa and record the transaction."""
+    user = request.user
+
+    # Ensure the user has both a savings and MPesa account
+    if not hasattr(user, 'savings_account'):
+        messages.error(request, "You do not have a savings account.")
+        return redirect('savings_dashboard')
+
+    if not hasattr(user, 'mpesa_account'):
+        messages.error(request, "You need an MPesa account to deposit money.")
+        return redirect('customer_dashboard')
+
+    savings_account = user.savings_account
+    mpesa_account = user.mpesa_account
+
+    if request.method == 'POST':
+        amount = request.POST.get('amount')
+        try:
+            amount = Decimal(amount)
+            if 0 < amount <= mpesa_account.balance:
+                # Perform deposit
+                savings_account.deposit(amount)
+                mpesa_account.balance -= amount  # Deduct from MPesa
+                mpesa_account.save()
+
+                # Generate unique transaction ID
+                transaction_id = f"TXN{uuid.uuid4().hex[:10].upper()}"
+
+                # Save transaction record
+                Transaction.objects.create(
+                    transaction_id=transaction_id,
+                    transaction_type="DEPOSIT",
+                    sender=mpesa_account,  # Money is leaving the MPesa account
+                    receiver=None,  # Not transferring to another MPesa account
+                    amount=amount,
+                    fee=0,  # No fee for savings deposit
+                    status="COMPLETED",
+                    description=f"Deposit to savings from MPesa by {user.username}",
+                )
+
+                messages.success(request, f"Deposited {amount} successfully!")
+                return redirect('savings_dashboard')
+            else:
+                messages.error(request, "Insufficient MPesa balance or invalid amount.")
+        except:
+            messages.error(request, "Invalid amount entered.")
+
+    return render(request, 'savings/deposit_savings.html')
+
+
+from decimal import Decimal, InvalidOperation
+import uuid
+
+@login_required
+def withdraw_savings(request):
+    """Allow the user to withdraw money from their savings account to MPesa and record the transaction."""
+    user = request.user
+
+    # Ensure the user has both a savings and MPesa account
+    if not hasattr(user, 'savings_account'):
+        messages.error(request, "You do not have a savings account.")
+        return redirect('savings_dashboard')
+
+    if not hasattr(user, 'mpesa_account'):
+        messages.error(request, "You need an MPesa account to withdraw money.")
+        return redirect('customer_dashboard')
+
+    savings_account = user.savings_account
+    mpesa_account = user.mpesa_account
+
+    if request.method == 'POST':
+        amount = request.POST.get('amount', '').strip()  # Strip spaces
+
+        try:
+            # Convert amount safely to Decimal
+            amount = Decimal(amount)
+            if amount <= 0:
+                messages.error(request, "Amount must be greater than zero.")
+                return redirect('withdraw_savings')
+
+            if amount > savings_account.balance:
+                messages.error(request, "Insufficient savings balance.")
+                return redirect('withdraw_savings')
+
+            # Perform withdrawal
+            savings_account.withdraw(amount)
+            mpesa_account.balance += amount  # Add to MPesa
+            mpesa_account.save()
+
+            # Generate unique transaction ID
+            transaction_id = f"TXN{uuid.uuid4().hex[:10].upper()}"
+
+            # Save transaction record
+            Transaction.objects.create(
+                transaction_id=transaction_id,
+                transaction_type="WITHDRAWAL",
+                sender=mpesa_account,  # ✅ Fix: Set sender as user's MPesa account
+                receiver=mpesa_account,  # ✅ MPesa account receives money
+                amount=amount,
+                fee=0,  # No withdrawal fee for this transaction
+                status="COMPLETED",
+                description=f"Withdrawal from savings to MPesa by {user.username}",
+            )
+
+            messages.success(request, f"Withdrew {amount} successfully!")
+            return redirect('savings_dashboard')
+
+        except (ValueError, InvalidOperation):
+            messages.error(request, "Invalid amount entered. Please enter a valid number.")
+
+    return render(request, 'savings/withdraw_savings.html')

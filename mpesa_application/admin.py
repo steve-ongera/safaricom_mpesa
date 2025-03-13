@@ -66,6 +66,19 @@ class UserLimitAdmin(admin.ModelAdmin):
     list_filter = ('transaction_type',)
     search_fields = ('user__username',)
 
+
+    
+from django.contrib import admin
+from .models import SavingsAccount
+
+@admin.register(SavingsAccount)
+class SavingsAccountAdmin(admin.ModelAdmin):
+    list_display = ('user', 'account_number', 'balance', 'created_at')
+    search_fields = ('user__username', 'account_number')
+    list_filter = ('created_at',)
+    readonly_fields = ('account_number', 'created_at')  # Prevent modifications
+
+
 # Register all models with their respective admin classes
 admin.site.register(User, CustomUserAdmin)
 admin.site.register(MPesaAccount, MPesaAccountAdmin)
