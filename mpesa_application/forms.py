@@ -168,3 +168,31 @@ class SavingsAccountForm(forms.ModelForm):
     class Meta:
         model = SavingsAccount
         fields = ['next_of_kin_name', 'next_of_kin_phone', 'next_of_kin_relationship']
+
+
+from django import forms
+from decimal import Decimal
+from .models import MPesaAccount
+
+class LoanRequestForm(forms.Form):
+    amount = forms.DecimalField(max_digits=10, decimal_places=2, label="Loan Amount")
+
+    def __init__(self, user, *args, **kwargs):
+        self.loan_tiers = kwargs.pop("loan_tiers", [])
+        super().__init__(*args, **kwargs)
+        self.user = user
+        self.max_loan = self.get_max_loan()
+
+    def get_max_loan(self):
+        try:
+            mpesa_account = MPesaAccount.objects.get(user=self.user)
+            balance = mpesa_account.balance
+        except MPesaAccount.DoesNotExist:
+            return 0
+
+        max_loan = 0
+        for tier_balance, loan_amount in self.loan_tiers:
+            if balance >= tier_balance:
+                max_loan = loan_amount
+
+        return max_loan

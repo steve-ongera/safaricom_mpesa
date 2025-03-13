@@ -1034,3 +1034,211 @@ def withdraw_savings(request):
             messages.error(request, "Invalid amount entered. Please enter a valid number.")
 
     return render(request, 'savings/withdraw_savings.html')
+
+
+from datetime import date, timedelta
+from decimal import Decimal
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from django.contrib.auth import get_user_model  # Use the custom User model
+from .models import Loan, MPesaAccount, Transaction
+from .forms import LoanRequestForm
+
+# Use the custom User model
+User = get_user_model()
+
+# Loan tiers
+LOAN_TIERS = [
+    (100, 0),
+    (300, 50),
+    (500, 100),
+    (1000, 200),
+    (2000, 500),
+    (5000, 1000),
+    (10000, 2000),
+]
+
+INTEREST_RATE = Decimal("0.02")  # 2% per day
+
+def request_loan(request):
+    """Handle loan requests based on eligibility."""
+
+    user = request.user
+    try:
+        mpesa_account = MPesaAccount.objects.get(user=user)
+    except MPesaAccount.DoesNotExist:
+        messages.error(request, "You do not have an M-Pesa account linked.")
+        return redirect("customer_dashboard")
+
+    # Get the superuser 'mpesa' as the loan provider
+    try:
+        mpesa_user = User.objects.get(username="mpesa")  
+        system_account = MPesaAccount.objects.get(user=mpesa_user)
+    except (User.DoesNotExist, MPesaAccount.DoesNotExist):
+        messages.error(request, "System error: M-Pesa account not set up.")
+        return redirect("customer_dashboard")
+
+    balance = mpesa_account.balance
+    max_loan = 0
+
+    # Check if user has an active loan
+    active_loan = Loan.objects.filter(user=user, status="PENDING").exists()
+    if active_loan:
+        messages.error(request, "You must fully repay your existing loan before taking a new one.")
+        return redirect("customer_dashboard")
+
+    # Determine maximum loan based on balance
+    for tier_balance, loan_amount in LOAN_TIERS:
+        if balance >= tier_balance:
+            max_loan = loan_amount
+
+    if request.method == "POST":
+        form = LoanRequestForm(user, request.POST)
+        if form.is_valid():
+            amount = form.cleaned_data["amount"]
+
+            if amount > max_loan:
+                messages.error(request, f"You can only borrow up to KES {max_loan}.")
+                return redirect("request_loan")
+
+            # Ensure the system has enough funds to issue the loan
+            if system_account.balance < amount:
+                messages.error(request, "M-Pesa system does not have enough funds to issue this loan.")
+                return redirect("request_loan")
+
+            due_date = date.today() + timedelta(days=30)
+
+            # Create Loan object
+            loan = Loan.objects.create(
+                user=user,
+                amount=amount,
+                interest_rate=Decimal("2.0"),  
+                repayment_due_date=due_date,
+                status="PENDING"
+            )
+
+            # Deduct loan amount from M-Pesa superuser account
+            system_account.balance -= amount
+            system_account.save()
+
+            # Add loan amount to borrower's M-Pesa account
+            mpesa_account.balance += amount
+            mpesa_account.save()
+
+            # Record the transaction
+            transaction = Transaction.objects.create(
+                transaction_id=f"LN{loan.id}{date.today().strftime('%Y%m%d')}",
+                transaction_type="LOAN",
+                sender=system_account,  
+                receiver=mpesa_account,
+                amount=amount,
+                status="COMPLETED",
+                description=f"Loan issued: KES {amount}"
+            )
+
+            messages.success(request, f"Loan request of KES {amount} approved. Due by {due_date}.")
+            return redirect("customer_dashboard")  
+
+    else:
+        form = LoanRequestForm(user)
+
+    return render(request, "loans/request_loan.html", {"form": form, "max_loan": max_loan})
+
+
+
+from decimal import Decimal
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth import get_user_model
+from .models import Loan, MPesaAccount, Transaction
+
+User = get_user_model()
+
+from datetime import datetime
+import uuid  # Import uuid for unique identifiers
+
+@login_required
+def repay_loan(request):
+    """Allows users to repay their outstanding loans, updating M-Pesa balances correctly."""
+
+    user = request.user
+
+    try:
+        mpesa_account = MPesaAccount.objects.get(user=user)
+    except MPesaAccount.DoesNotExist:
+        messages.error(request, "You do not have an M-Pesa account linked.")
+        return redirect("customer_dashboard")
+
+    try:
+        mpesa_user = User.objects.get(username="mpesa")  
+        system_account = MPesaAccount.objects.get(user=mpesa_user)
+    except (User.DoesNotExist, MPesaAccount.DoesNotExist):
+        messages.error(request, "System error: M-Pesa account not set up.")
+        return redirect("customer_dashboard")
+
+    active_loan = Loan.objects.filter(user=user, is_paid=False).order_by("-repayment_due_date").first()
+    if not active_loan:
+        messages.info(request, "You have no active loans to repay.")
+        return redirect("customer_dashboard")
+
+    if request.method == "POST":
+        amount = request.POST.get("amount")
+
+        try:
+            amount = Decimal(amount)
+            if amount <= 0:
+                messages.error(request, "Invalid repayment amount.")
+                return redirect("repay_loan")
+
+            if amount > mpesa_account.balance:
+                messages.error(request, "Insufficient balance in M-Pesa account.")
+                return redirect("repay_loan")
+
+            # Deduct from borrower's M-Pesa account
+            mpesa_account.balance -= amount
+            mpesa_account.save()
+
+            # Credit the amount back to the system M-Pesa account
+            system_account.balance += amount
+            system_account.save()
+
+            # Debugging: Print loan details before update
+            print(f"Before update: Remaining Amount: {active_loan.remaining_amount}, Status: {active_loan.status}, Is Paid: {active_loan.is_paid}")
+
+            # Update the loan balance
+            active_loan.remaining_amount = max(Decimal(0), active_loan.remaining_amount - amount)
+
+            # If loan is fully repaid
+            if active_loan.remaining_amount == 0:
+                active_loan.is_paid = True
+                active_loan.status = "REPAID"
+
+            active_loan.save(update_fields=["remaining_amount", "is_paid", "status"])  # Ensure only these fields are updated
+            active_loan.refresh_from_db()  # Reload from DB to check persistence
+
+            # Debugging: Print loan details after update
+            print(f"After update: Remaining Amount: {active_loan.remaining_amount}, Status: {active_loan.status}, Is Paid: {active_loan.is_paid}")
+
+            # Generate a **unique** transaction ID
+            unique_id = uuid.uuid4().hex[:8]  # Generate a short unique ID
+            transaction_id = f"RP{active_loan.id}{user.id}{unique_id}"  # Ensure uniqueness
+
+            # Save the repayment transaction
+            Transaction.objects.create(
+                transaction_id=transaction_id,
+                transaction_type="PAYMENT",
+                sender=mpesa_account,
+                receiver=system_account,
+                amount=amount,
+                status="COMPLETED",
+                description=f"Loan repayment of KES {amount}"
+            )
+
+            messages.success(request, f"Loan repayment of {amount} was successful!")
+            return redirect("customer_dashboard")
+
+        except ValueError:
+            messages.error(request, "Invalid amount entered.")
+
+    return render(request, "loans/repay_loan.html", {"loan": active_loan})

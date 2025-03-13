@@ -34,5 +34,8 @@ urlpatterns = [
     path('deposit/', views.deposit_savings, name='deposit_savings'),
     path('withdraw/', views.withdraw_savings, name='withdraw_savings'),
 
+    #loans
+    path('request-loan/', views.request_loan, name='request_loan'),
+    path('repay-loan/', views.repay_loan, name='repay_loan'),
 
 ]

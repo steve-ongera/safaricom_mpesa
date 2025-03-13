@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <div class="container">
+    <h2>Request a Loan</h2>
+    
+    <!-- Show max loan eligibility -->
+    <p>Your maximum loan eligibility: <strong>KES {{ max_loan }}</strong></p>
+
+    <!-- Display Messages -->
+    {% if messages %}
+      <ul class="messages">
+        {% for message in messages %}
+          <li class="{{ message.tags }}">{{ message }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+
+    <form method="post">
+      {% csrf_token %}
+      
+      <label for="id_amount">Enter Loan Amount:</label>
+      <input type="number" name="amount" id="id_amount" step="0.01" required>
+      
+      <button type="submit">Request Loan</button>
+    </form>
+  </div>
+{% endblock %}

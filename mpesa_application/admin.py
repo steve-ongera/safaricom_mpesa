@@ -67,7 +67,7 @@ class UserLimitAdmin(admin.ModelAdmin):
     search_fields = ('user__username',)
 
 
-    
+
 from django.contrib import admin
 from .models import SavingsAccount
 
@@ -77,6 +77,18 @@ class SavingsAccountAdmin(admin.ModelAdmin):
     search_fields = ('user__username', 'account_number')
     list_filter = ('created_at',)
     readonly_fields = ('account_number', 'created_at')  # Prevent modifications
+
+
+from django.contrib import admin
+from .models import Loan, Transaction
+
+@admin.register(Loan)
+class LoanAdmin(admin.ModelAdmin):
+    list_display = ('user', 'amount', 'status',  'created_at')
+    list_filter = ('status', )
+    search_fields = ('user__username', 'amount')
+    ordering = ('-created_at',)
+
 
 
 # Register all models with their respective admin classes

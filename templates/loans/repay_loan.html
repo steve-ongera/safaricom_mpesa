@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h2 class="text-center">Repay Loan</h2>
+
+    {% if loan %}
+        <div class="card p-3 shadow">
+            <p><strong>Loan Amount:</strong> KES {{ loan.amount }}</p>
+            <p><strong>Remaining Balance:</strong> KES {{ loan.remaining_amount }}</p>
+            <p><strong>Due Date:</strong> {{ loan.repayment_due_date }}</p>
+        </div>
+
+        <form method="post" class="mt-3">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="amount" class="form-label">Enter Repayment Amount (KES):</label>
+                <input type="number" name="amount" id="amount" class="form-control" min="1" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Repay Loan</button>
+        </form>
+
+    {% else %}
+        <div class="alert alert-info">You have no active loans to repay.</div>
+    {% endif %}
+
+    <a href="{% url 'customer_dashboard' %}" class="btn btn-secondary mt-3">Back to Dashboard</a>
+</div>
+{% endblock %}

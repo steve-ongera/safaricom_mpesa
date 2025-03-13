@@ -209,6 +209,7 @@ class Transaction(models.Model):
         ('PAYMENT', 'Payment'),
         ('AIRTIME', 'Airtime Purchase'),
         ('BILLPAY', 'Bill Payment'),
+        ('LOAN', 'loan'),
     ]
     
     STATUS_CHOICES = [
@@ -312,3 +313,42 @@ class UserLimit(models.Model):
     
     def __str__(self):
         return f"{self.user.username} - {self.transaction_type} - Max: {self.max_amount}"
+
+
+class Loan(models.Model):
+    """Model to manage loans for users."""
+
+    STATUS_CHOICES = [
+        ('PENDING', 'Pending'),
+        ('APPROVED', 'Approved'),
+        ('REJECTED', 'Rejected'),
+        ('REPAID', 'Repaid'),
+    ]
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='loans')
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    interest_rate = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal('2.0'))  
+    repayment_due_date = models.DateField()
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='PENDING')
+    is_paid = models.BooleanField(default=False)
+    remaining_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def save(self, *args, **kwargs):
+        print(f"Saving Loan: ID={self.id}, Remaining={self.remaining_amount}, Is Paid={self.is_paid}, Status={self.status}")
+
+        if self.remaining_amount is None:
+            self.remaining_amount = self.amount  # Only set if it's None (not 0.00)
+
+        if self.remaining_amount <= 0:
+            self.is_paid = True
+            self.status = "REPAID"
+        else:
+            self.is_paid = False
+
+        super().save(*args, **kwargs)
+
+
+    def __str__(self):
+        return f"Loan of {self.amount} for {self.user.username} - {'Paid' if self.is_paid else 'Pending'}"
