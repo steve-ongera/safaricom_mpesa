@@ -1,0 +1,162 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4>Register New M-PESA Customer</h4>
+                </div>
+                <div class="card-body">
+                    {% if messages %}
+                    <div class="messages">
+                        {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }}">
+                            {{ message }}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    
+                    <form method="post" id="registration-form">
+                        {% csrf_token %}
+                        
+                        <div class="card mb-4">
+                            <div class="card-header bg-light">
+                                <h5>Customer Information</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="{{ user_form.first_name.id_for_label }}">First Name:</label>
+                                        {{ user_form.first_name }}
+                                        {% if user_form.first_name.errors %}
+                                        <div class="text-danger">{{ user_form.first_name.errors }}</div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="{{ user_form.last_name.id_for_label }}">Last Name:</label>
+                                        {{ user_form.last_name }}
+                                        {% if user_form.last_name.errors %}
+                                        <div class="text-danger">{{ user_form.last_name.errors }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="{{ user_form.id_number.id_for_label }}">ID Number:</label>
+                                        {{ user_form.id_number }}
+                                        {% if user_form.id_number.errors %}
+                                        <div class="text-danger">{{ user_form.id_number.errors }}</div>
+                                        {% endif %}
+                                        <div id="id-verification-status"></div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="{{ user_form.date_of_birth.id_for_label }}">Date of Birth:</label>
+                                        {{ user_form.date_of_birth }}
+                                        {% if user_form.date_of_birth.errors %}
+                                        <div class="text-danger">{{ user_form.date_of_birth.errors }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="{{ user_form.phone_number.id_for_label }}">Phone Number:</label>
+                                    {{ user_form.phone_number }}
+                                    <small class="form-text text-muted">Format: +254XXXXXXXXX</small>
+                                    {% if user_form.phone_number.errors %}
+                                    <div class="text-danger">{{ user_form.phone_number.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card mb-4">
+                            <div class="card-header bg-light">
+                                <h5>M-PESA Account Setup</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle"></i> Inform the customer that they will receive their M-PESA account number upon successful registration.
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="{{ account_form.pin.id_for_label }}">PIN:</label>
+                                        {{ account_form.pin }}
+                                        <small class="form-text text-muted">4-digit secret PIN</small>
+                                        {% if account_form.pin.errors %}
+                                        <div class="text-danger">{{ account_form.pin.errors }}</div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="{{ account_form.confirm_pin.id_for_label }}">Confirm PIN:</label>
+                                        {{ account_form.confirm_pin }}
+                                        {% if account_form.confirm_pin.errors %}
+                                        <div class="text-danger">{{ account_form.confirm_pin.errors }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                {% if account_form.non_field_errors %}
+                                <div class="alert alert-danger">
+                                    {{ account_form.non_field_errors }}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="terms" required>
+                                <label class="form-check-label" for="terms">
+                                    I confirm that I have verified the customer's identity document and the information provided is correct.
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="text-center mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg">Register Customer</button>
+                            <a href="{% url 'agent_dashboard' %}" class="btn btn-secondary btn-lg ml-2">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    // ID verification AJAX
+    $(document).ready(function() {
+        $('#id_id_number').blur(function() {
+            const idNumber = $(this).val();
+            if (idNumber.length >= 7) {
+                $.ajax({
+                    url: '{% url "verify_customer_id" %}',
+                    type: 'POST',
+                    data: {
+                        'id_number': idNumber,
+                        'csrfmiddlewaretoken': '{{ csrf_token }}'
+                    },
+                    dataType: 'json',
+                    success: function(data) {
+                        let statusDiv = $('#id-verification-status');
+                        if (data.user_exists) {
+                            statusDiv.html('<div class="alert alert-warning mt-2">This ID is already registered with M-PESA.</div>');
+                        } else if (!data.can_register) {
+                            statusDiv.html('<div class="alert alert-danger mt-2">This ID already has 5 active phone lines. Cannot register more.</div>');
+                        } else {
+                            statusDiv.html('<div class="alert alert-success mt-2">ID verification successful.</div>');
+                        }
+                    }
+                });
+            }
+        });
+    });
+</script>
+{% endblock %}
+{% endblock %}

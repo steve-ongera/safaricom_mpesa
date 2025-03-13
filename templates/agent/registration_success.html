@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card border-success">
+                <div class="card-header bg-success text-white">
+                    <h4><i class="fas fa-check-circle"></i> Registration Successful</h4>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-user-check fa-4x text-success"></i>
+                        <h4 class="mt-3">Customer Successfully Registered</h4>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <p class="mb-0">A new M-PESA account has been created for:</p>
+                    </div>
+                    
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p><strong>Customer Name:</strong> {{ account.user.get_full_name }}</p>
+                                    <p><strong>Phone Number:</strong> {{ account.user.phone_number }}</p>
+                                    <p><strong>ID Number:</strong> {{ account.user.id_number }}</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p><strong>Account Number:</strong> {{ account.account_number }}</p>
+                                    <p><strong>Registration Date:</strong> {{ account.created_at|date:"d M Y, H:i" }}</p>
+                                    <p><strong>Status:</strong> <span class="badge badge-success">Active</span></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-warning">
+                        <h5 class="alert-heading">Important Instructions for the Customer:</h5>
+                        <ol>
+                            <li>The customer should keep their PIN confidential and not share it with anyone.</li>
+                            <li>They can now use their registered phone number to access M-PESA services.</li>
+                            <li>To activate their account fully, they should make an initial deposit.</li>
+                            <li>For any issues, they should contact M-PESA customer care.</li>
+                        </ol>
+                    </div>
+                    
+                    <div class="text-center mt-4">
+                        <a href="{% url 'initial_deposit' account_id=account.id %}" class="btn btn-primary btn-lg">Make Initial Deposit</a>
+                        <a href="{% url 'register_customer' %}" class="btn btn-success btn-lg ml-2">Register Another Customer</a>
+                        <a href="{% url 'agent_dashboard' %}" class="btn btn-secondary btn-lg ml-2">Return to Dashboard</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
