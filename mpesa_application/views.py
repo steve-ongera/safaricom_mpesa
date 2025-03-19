@@ -529,21 +529,32 @@ from django.contrib.auth import authenticate, login
 from django.contrib import messages
 from django.shortcuts import render, redirect
 
+from django.contrib.auth import authenticate, login
+from django.contrib import messages
+from django.shortcuts import render, redirect
+from django.contrib.auth.models import User
+
 def login_view(request):
     if request.method == "POST":
         phone_number = request.POST.get("phone_number")
         pin = request.POST.get("pin")
 
         try:
-            # Check if the user exists
+            # Check if user exists
             user = User.objects.get(username=phone_number)
 
-            # Authenticate the user
+            # Authenticate
             authenticated_user = authenticate(request, username=user.username, password=pin)
 
             if authenticated_user is not None:
                 login(request, authenticated_user)
-                return redirect("customer_dashboard")  # Redirect to the customer dashboard
+
+                # Check if user is staff
+                if authenticated_user.is_staff:
+                    return redirect("agent_dashboard")  # Agent dashboard
+                else:
+                    return redirect("customer_dashboard")  # Normal user dashboard
+
             else:
                 messages.error(request, "Invalid phone number or PIN")
 
@@ -551,6 +562,7 @@ def login_view(request):
             messages.error(request, "Account with this phone number does not exist")
 
     return render(request, "auth/login.html")
+
 
 def user_logout(request):
     """Logs out the user and redirects to the login page"""
