@@ -573,6 +573,9 @@ def user_logout(request):
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from django.db import models
+from django.db.models import Count
+import json
+
 
 @login_required
 def customer_dashboard(request):
@@ -582,6 +585,7 @@ def customer_dashboard(request):
     # Initialize empty lists
     latest_transactions = []
     transaction_partners = []
+    transaction_types_data = []
     
     if mpesa_account:
         # Get the latest transactions where user is either sender or receiver
@@ -590,6 +594,24 @@ def customer_dashboard(request):
             models.Q(sender=mpesa_account) | models.Q(receiver=mpesa_account),
             transaction_type='TRANSFER'  # Only include transfers between users
         ).order_by('-timestamp')[:6]
+
+
+        # Get transaction type statistics
+        transaction_types = Transaction.objects.filter(
+            models.Q(sender=mpesa_account) | models.Q(receiver=mpesa_account)
+        ).values('transaction_type').annotate(
+            count=Count('transaction_type')
+        ).order_by('-count')
+
+        # Format data for the donut chart
+        transaction_types_data = []
+        for item in transaction_types:
+            # Get the display name for the transaction type
+            display_name = dict(Transaction.TRANSACTION_TYPES).get(item['transaction_type'], item['transaction_type'])
+            transaction_types_data.append({
+                'type': display_name,
+                'count': item['count']
+            })
         
         # For each transaction, get the other party (the person you transacted with)
         for transaction in latest_transactions:
@@ -618,7 +640,8 @@ def customer_dashboard(request):
         "user": request.user,
         "mpesa_account": mpesa_account,
         "latest_transactions": latest_transactions,
-        "transaction_partners": transaction_partners[:6]  # Limit to 6 items
+        "transaction_partners": transaction_partners[:6] , # Limit to 6 items
+        "transaction_types_json": json.dumps(transaction_types_data)  # Convert to JSON for JavaScript
     }
     return render(request, "customer/customer_dashboard.html", context)
 

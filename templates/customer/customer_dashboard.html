@@ -352,7 +352,7 @@
                                 <div class="section-text d-flex align-items-center justify-content-between">
                                     <h6>Payment Analytics</h6>
                                     <div class="select-box">
-                                        <select>
+                                        <select id="chart-period">
                                             <option>Monthly</option>
                                             <option value="1">Jan</option>
                                             <option value="2">Feb</option>
@@ -360,8 +360,63 @@
                                         </select>
                                     </div>
                                 </div>
-                                <div id="chart"></div>
+                                <div style="height: 300px; position: relative;">
+                                    <canvas id="chart"></canvas>
+                                </div>
                             </div>
+                            
+                            <!-- Make sure you have Chart.js included in your base template or add it here -->
+                            <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+                            
+                            <script>
+                                document.addEventListener('DOMContentLoaded', function() {
+                                    // Get the transaction types data from the context
+                                    const transactionTypesData = {{ transaction_types_json|safe }};
+                                    
+                                    // Prepare data for Chart.js
+                                    const labels = transactionTypesData.map(item => item.type);
+                                    const data = transactionTypesData.map(item => item.count);
+                                    
+                                    // Define colors for the chart
+                                    const colors = [
+                                        '#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b', '#5a5c69', '#858796'
+                                    ];
+                                    
+                                    // Create the chart
+                                    const ctx = document.getElementById('chart');
+                                    const myChart = new Chart(ctx, {
+                                        type: 'doughnut',
+                                        data: {
+                                            labels: labels,
+                                            datasets: [{
+                                                data: data,
+                                                backgroundColor: colors.slice(0, data.length),
+                                                hoverOffset: 4
+                                            }]
+                                        },
+                                        options: {
+                                            responsive: true,
+                                            maintainAspectRatio: false,
+                                            plugins: {
+                                                legend: {
+                                                    position: 'right',
+                                                },
+                                                title: {
+                                                    display: true,
+                                                    text: 'Transaction Types'
+                                                }
+                                            }
+                                        }
+                                    });
+                                    
+                                    // Optional: Update chart when period changes
+                                    document.getElementById('chart-period').addEventListener('change', function() {
+                                        // Here you would make an AJAX call to get new data based on the selected period
+                                        // For now, we'll just keep the same data
+                                        console.log('Period changed to: ' + this.value);
+                                    });
+                                });
+                            </script>
                             <div class="single-item">
                                 <div class="section-text d-flex align-items-center justify-content-between">
                                     <h6>Recent Transactions</h6>
@@ -667,33 +722,3 @@
     <!-- Transactions Popup start -->
 
     {% endblock content %}
-
-{% comment %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User Dashboard</title>
-</head>
-<body>
-    {% if messages %}
-    <ul class="messages">
-      {% for message in messages %}
-        <li class="{{ message.tags }}">{{ message }}</li>
-      {% endfor %}
-    </ul>
-  {% endif %}
-    <h2>Welcome, {{ user.username }}</h2>
-    <p>Phone Number: {{ user.phone_number }}</p>
-
-    {% if mpesa_account %}
-        <p>M-Pesa Balance: Ksh {{ mpesa_account.balance }}</p>
-    {% else %}
-        <p>No M-Pesa account linked.</p>
-    {% endif %}
-
-    <a href="{% url 'logout'%}">Logout</a>
-</body>
-</html>
-{% endcomment %}
