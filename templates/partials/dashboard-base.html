@@ -1,0 +1,335 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>KCoin - Money Transfer and Online Payments Dashboard</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+
+    <link rel="shortcut icon" href="{% static 'assets/images/fav.png'%}" type="image/x-icon"/>
+    <link rel="stylesheet" href="{% static 'assets1/css/bootstrap.min.css' %}"/>
+    <link rel="stylesheet" href="{% static 'assets1/css/fontawesome.min.css' %}"/>
+    <link rel="stylesheet" href="{% static 'assets1/css/jquery-ui.css' %}" />
+    <link rel="stylesheet" href="{% static 'assets1/css/plugin/apexcharts.css' %}"/>
+    <link rel="stylesheet" href="{% static 'assets1/css/plugin/nice-select.css' %}"/>
+    <link rel="stylesheet" href="{% static 'assets1/css/arafat-font.css' %}" />
+    <link rel="stylesheet" href="{% static 'assets1/css/plugin/animate.css' %}"/>
+    <link rel="stylesheet" href="{% static 'assets1/css/style.css' %}" />
+  </head>
+
+  <body>
+
+    <!-- Scroll To Top Start-->
+    <a href="javascript:void(0)" class="scrollToTop"
+      ><i class="fas fa-angle-double-up"></i
+    ></a>
+    <!-- Scroll To Top End -->
+
+    <!-- header-section start -->
+    <header class="header-section body-collapse">
+      <div class="overlay">
+        <div class="container-fruid">
+          <div class="row d-flex header-area">
+            <div
+              class="navbar-area d-flex align-items-center justify-content-between"
+            >
+              <div class="sidebar-icon">
+                <img
+                  src="{% static 'assets1/images/icon/menu.png' %}"
+                  alt="icon"
+                />
+              </div>
+              
+              {% comment %} Search Field {% endcomment %}
+              <form method="POST" class="d-flex flex-fill">
+                {% csrf_token %}
+                <div class="input-group input-group-lg shadow-sm rounded-pill overflow-hidden">
+                  <span class="input-group-text bg-white border-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-search text-muted" viewBox="0 0 16 16">
+                      <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
+                    </svg>
+                  </span>
+                  <input 
+                    type="text" 
+                    name="q"
+                    class="form-control border-0 py-2 px-3" 
+                    placeholder="Type to search..." 
+                    aria-label="Search"
+                  >
+                </div>
+              </form>
+              
+              
+              <div class="dashboard-nav">
+                <div class="single-item language-area">
+                  <div class="language-btn">
+                    <img
+                      src="{% static 'assets1/images/icon/lang.png' %}"
+                      alt="icon"
+                    />
+                  </div>
+                  <ul class="main-area language-content">
+                    <li>English</li>
+                    <li>Hindi</li>
+                    <li class="active">English (US)</li>
+                    <li>Japanese</li>
+                    <li>Kannada</li>
+                    <li>Lithuanian</li>
+                  </ul>
+                </div>
+                <div class="single-item notifications-area">
+                  <div class="notifications-btn">
+                    <img
+                      src="{% static 'assets1/images/icon/bell.png' %}"
+                      class="bell-icon"
+                      alt="icon"
+                    />
+                  </div>
+                  <div class="main-area notifications-content">
+                    <div class="head-area d-flex justify-content-between">
+                      <h5>Notifications</h5>
+                      <span class="mdr">4</span>
+                    </div>
+                    <ul>
+                      <li>
+                        <a href="javascript:void(0)" class="d-flex">
+                          <div class="img-area">
+                            <img
+                              src="{% static 'assets1/images/user-1.png' %}"
+                              class="max-un"
+                              alt="image"
+                            />
+                          </div>
+                          <div class="text-area">
+                            <p class="mdr">
+                              You received a payment of <b>ksh 134.00</b> from
+                              <b>Anna Green</b>
+                            </p>
+                            <p class="mdr time-area">09.39AM</p>
+                          </div>
+                        </a>
+                        <i class="fa-solid fa-caret-right"></i>
+                      </li>
+                      <li>
+                        <a href="javascript:void(0)" class="d-flex">
+                          <div class="img-area">
+                            <img
+                              src="{% static 'assets1/images/user-2.png' %}"
+                              class="max-un"
+                              alt="image"
+                            />
+                          </div>
+                          <div class="text-area">
+                            <p class="mdr">
+                              <b>James Deed</b> requested a payment of
+                              <b>£890.00</b>
+                            </p>
+                            <p class="mdr time-area">08.09AM</p>
+                          </div>
+                        </a>
+                        <i class="fa-solid fa-caret-right"></i>
+                      </li>
+                      <li>
+                        <a href="javascript:void(0)" class="d-flex">
+                          <div class="img-area">
+                            <img
+                              src="{% static 'assets1/images/master-card.png' %}"
+                              class="max-un"
+                              alt="image"
+                            />
+                          </div>
+                          <div class="text-area">
+                            <p class="mdr">
+                              Your new payment method has beed added
+                              successfully
+                            </p>
+                            <p class="mdr time-area">09.39AM</p>
+                          </div>
+                        </a>
+                        <i class="fa-solid fa-caret-right"></i>
+                      </li>
+                      <li>
+                        <a href="javascript:void(0)" class="d-flex">
+                          <div class="img-area">
+                            <img
+                              src="{% static 'assets1/images/user-3.png' %}"
+                              class="max-un"
+                              alt="image"
+                            />
+                          </div>
+                          <div class="text-area">
+                            <p class="mdr">
+                              You received a payment of <b>ksh 250.00</b> from
+                              Goerge Michael
+                            </p>
+                            <p class="mdr time-area">Yesterday</p>
+                          </div>
+                        </a>
+                        <i class="fa-solid fa-caret-right"></i>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+                <div class="single-item user-area">
+                  <div class="profile-area d-flex align-items-center">
+                    <span class="user-profile">
+                      <img style="width: 40px; height:40px; border-radius:50%; object-fit:cover;" src="{{kyc.image.url}}" alt="image">
+                    </span>
+                    <i class="fa-solid fa-sort-down"></i>
+                  </div>
+                  <div class="main-area user-content">
+                    <div class="head-area d-flex align-items-center">
+                      <div class="profile-img">
+                        <img style="width: 60px; height:60px; border-radius:50%; object-fit:cover;" src="{{kyc.image.url}}" alt="image">
+                      </div>
+                      <div class="profile-head">
+                        <a href=" {% url "account:account" %}">
+                          {% comment %} <h5>{{kyc.full_name|title}}</h5> {% endcomment %}
+                          <h5>{{kyc.user.username}}</h5>
+                        </a>
+                        <p class="wallet-id"><small> Acct No: {{account.account_number}}</small></p>
+                      </div>
+                    </div>
+                    <ul>
+                      {% if request.user.is_superuser %}
+                      <li class="border-area">
+                        <a href="/admin"
+                          ><i class="fas fa-user"></i>Admin</a
+                        >
+                      </li>
+                      {% endif %}
+
+                      <li class="border-area">
+                        <a href="#"
+                          ><i class="fas fa-cog"></i>Settings</a
+                        >
+                      </li>
+                      <li>
+                        <a href="{% url "user_auths:sign-out" %}"
+                          ><i class="fas fa-sign-out"></i>Logout</a
+                        >
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="sidebar-wrapper">
+              <div class="close-btn">
+                <i class="fa-solid fa-xmark"></i>
+              </div>
+              <div class="sidebar-logo">
+                <a href="/">
+                  <img src="{% static 'assets/images/logo.png' %}" alt="logo" id="logo-img">
+                </a>
+              </div>
+              <ul>
+                <li>
+                  <a href="{% url "account:dashboard" %}">
+                    <img src="{% static 'assets1/images/bootstrap-icons-1.8.2/speedometer2.svg' %}" class="icon-spacing" alt="Speedometer Icon">
+                    <span>Dashboard</span>
+                  </a>
+                </li>
+                <li>
+                  <a href="{% url "core:transactions" %}">
+                    <img src="{% static 'assets1/images/bootstrap-icons-1.8.2/receipt.svg' %}" class="icon-spacing" alt="Receipt Icon">
+                    <span>Transactions</span>
+                  </a>
+                </li>
+                <li>
+                  <a href="{% url 'core:search-account' %}">
+                    <img src="{% static 'assets1/images/bootstrap-icons-1.8.2/credit-card.svg' %}" class="icon-spacing" alt="Credit Card Icon">
+                    <span>Transfer</span>
+                  </a>
+                </li>
+                <li>
+                  <a href="{% url "core:request-search-users" %}">
+                    <img src="{% static 'assets1/images/bootstrap-icons-1.8.2/arrow-down-circle.svg' %}" class="icon-spacing" alt="Arrow Down Circle Icon">
+                    <span>Receive</span>
+                  </a>
+                </li>
+                <li>
+                  <a href="#">
+                    <img src="{% static 'assets1/images/bootstrap-icons-1.8.2/person.svg' %}" class="icon-spacing" alt="Person Icon">
+                    <span>Recipients</span>
+                  </a>
+                </li>
+                <li>
+                  <a href="#">
+                    <img src="{% static 'assets1/images/bootstrap-icons-1.8.2/wallet2.svg' %}" class="icon-spacing" alt="Wallet Icon">
+                    <span>Deposit Money</span>
+                  </a>
+                </li>
+                <li>
+                  <a href="#l">
+                    <img src="{% static 'assets1/images/bootstrap-icons-1.8.2/cash-stack.svg' %}" class="icon-spacing" alt="Cash Stack Icon">
+                    <span>Withdraw Money</span>
+                  </a>
+                </li>
+              </ul>
+              <ul class="bottom-item">
+                <li class="active">
+                  <a href="{% url 'account:account' %}">
+                    <img src="{% static 'assets1/images/bootstrap-icons-1.8.2/person-circle.svg' %}" class="icon-spacing" alt="Person Circle Icon">
+                    <span>Account</span>
+                  </a>
+                </li>
+                <li>
+                  <a href="javascript:void(0)">
+                    <img src="{% static 'assets1/images/bootstrap-icons-1.8.2/life-preserver.svg' %}" class="icon-spacing" alt="Life Preserver Icon">
+                    <span>Support</span>
+                  </a>
+                </li>
+                <li>
+                  <a href="{% url "user_auths:sign-out" %}">
+                    <img src="{% static 'assets1/images/bootstrap-icons-1.8.2/box-arrow-right.svg' %}" class="icon-spacing" alt="Box Arrow Right Icon">
+                    <span>Quit</span>
+                  </a>
+                </li>
+              </ul>
+              <div style="padding-top: 50px">
+                <div class="invite-now">
+                  <div class="img-area">
+                    <img
+                      src="{% static 'assets1/images/invite-now-illus.png' %}"
+                      alt="Image"
+                    />
+                  </div>
+                  <p>Invite your friend and get ksh 25</p>
+                  <a href="javascript:void(0)" class="cmn-btn">Invite Now</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+      {% endif %}
+
+    </header>
+    <!-- header-section end -->
+
+    {% block content %}{% endblock content %}
+
+    <!--==================================================================-->
+    <script src="{% static 'assets1/js/jquery.min.js' %}"></script>
+    <script src="{% static 'assets1/js/bootstrap.min.js' %}"></script>
+    <script src="{% static 'assets1/js/jquery-ui.js' %}"></script>
+    <script src="{% static 'assets1/js/plugin/apexcharts.js' %}"></script>
+    <script src="{% static 'assets1/js/plugin/jquery.nice-select.min.js' %}"></script>
+    <script src="{% static 'assets1/js/plugin/waypoint.min.js' %}"></script>
+    <script src="{% static 'assets1/js/plugin/wow.min.js' %}"></script>
+    <script src="{% static 'assets1/js/plugin/plugin.js' %}"></script>
+    <script src="{% static 'assets1/js/main.js' %}"></script>
+  </body>
+</html>

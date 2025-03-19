@@ -1,0 +1,253 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Safaricom | Mpesa</title>
+    <link
+      rel="shortcut icon"
+      href="{% static 'assets/images/fav.png' %}"
+      type="image/x-icon"
+    /> 
+    <link rel="stylesheet" href="{% static 'assets/css/bootstrap.min.css' %}" />
+    {% comment %} <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous"> {% endcomment %}
+
+    <link rel="stylesheet" href="{% static 'assets/css/fontawesome.min.css' %}" />
+    {% comment %} <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css" integrity="sha512-HK5fgLBL+xu6dm/Ii3z4xhlSUyZgTT9tuc/hSrtw6uzJOvgRr2a9jyxxT1ely+B+xFAmJKVSTbpM/CuL7qxO8w==" crossorigin="anonymous" referrerpolicy="no-referrer" /> {% endcomment %}
+
+    <link rel="stylesheet" href="{% static 'assets/css/jquery-ui.css' %}" />
+    {% comment %} <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.13.3/themes/base/jquery-ui.min.css" integrity="sha512-8PjjnSP8Bw/WNPxF6wkklW6qlQJdWJc/3w/ZQPvZ/1bjVDkrrSqLe9mfPYrMxtnzsXFPc434+u4FHLnLjXTSsg==" crossorigin="anonymous" referrerpolicy="no-referrer" /> {% endcomment %}
+
+    <link rel="stylesheet" href="{% static 'assets/css/plugin/nice-select.css' %}" />
+    <link rel="stylesheet" href="{% static 'assets/css/plugin/magnific-popup.css' %}" />
+    <link rel="stylesheet" href="{% static 'assets/css/plugin/slick.css' %}" />
+    <link rel="stylesheet" href="{% static 'assets/css/arafat-font.css' %}" />
+    <link rel="stylesheet" href="{% static 'assets/css/plugin/animate.css' %}" />
+    <link rel="stylesheet" href="{% static 'assets/css/style.css' %}" />
+  </head>
+
+  <body>
+    <!-- start preloader -->
+    {% comment %} <div class="preloader" id="preloader"></div> {% endcomment %}
+    <!-- end preloader -->
+
+    <!-- Scroll To Top Start-->
+    <a href="javascript:void(0)" class="scrollToTop"
+      ><i class="fas fa-angle-double-up"></i
+    ></a>
+    <!-- Scroll To Top End -->
+
+    <!-- header-section start -->
+    <header class="header-section">
+      <div class="overlay">
+        <div class="container">
+          <div class="row d-flex header-area">
+            <nav class="navbar navbar-expand-lg navbar-light">
+              <a class="navbar-brand" href="/">
+                <img
+                  src="{% static 'assets/images/logo.png' %}"
+                  class="logo"
+                  alt="logo"
+                />
+              </a>
+              <button
+                class="navbar-toggler collapsed"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#navbar-content"
+              >
+                <i class="fas fa-bars"></i>
+              </button>
+              <div
+                class="collapse navbar-collapse justify-content-end"
+                id="navbar-content"
+              >
+                <ul class="navbar-nav mr-auto mb-2 mb-lg-0">
+                  <li class="nav-item dropdown main-navbar">
+                    <a
+                      class="nav-link dropdown-toggle"
+                      href="javascript:void(0)"
+                      data-bs-toggle="dropdown"
+                      data-bs-auto-close="outside"
+                      >Personal</a
+                    >
+                    <ul class="dropdown-menu main-menu shadow">
+                      <li>
+                        <a class="nav-link" href="security.html">Security</a>
+                      </li>
+                      <li><a class="nav-link" href="fees.html">Fees</a></li>
+                    </ul>
+                  </li>
+                  <li class="nav-item dropdown main-navbar">
+                    <a
+                      class="nav-link dropdown-toggle"
+                      href="javascript:void(0)"
+                      data-bs-toggle="dropdown"
+                      data-bs-auto-close="outside"
+                      >Business</a
+                    >
+                    <ul class="dropdown-menu main-menu shadow">
+                      <li>
+                        <a class="nav-link" href="payments-01.html"
+                          >Business Payments</a
+                        >
+                      </li>
+                      <li>
+                        <a class="nav-link" href="business-account.html"
+                          >Business Account</a
+                        >
+                      </li>
+                      <li>
+                        <a class="nav-link" href="corporate-card.html"
+                          >Corporate Card</a
+                        >
+                      </li>
+                      <li>
+                        <a class="nav-link" href="invoice-management.html"
+                          >Invoice</a
+                        >
+                      </li>
+                      <li>
+                        <a class="nav-link" href="rewards.html">Rewards</a>
+                      </li>
+                      <li><a class="nav-link" href="fees.html">Fees</a></li>
+                    </ul>
+                  </li>
+                  <li class="nav-item dropdown main-navbar">
+                    <a
+                      class="nav-link dropdown-toggle"
+                      href="javascript:void(0)"
+                      data-bs-toggle="dropdown"
+                      data-bs-auto-close="outside"
+                      >Company</a
+                    >
+                    <ul class="dropdown-menu main-menu shadow">
+                      <li>
+                        <a class="nav-link" href="about-us.html">About Us</a>
+                      </li>
+                      <li><a class="nav-link" href="career.html">Career</a></li>
+                      <li>
+                        <a class="nav-link" href="career-details.html"
+                          >Career Details</a
+                        >
+                      </li>
+                      <li class="dropend sub-navbar">
+                        <a
+                          href="javascript:void(0)"
+                          class="dropdown-item dropdown-toggle"
+                          data-bs-toggle="dropdown"
+                          data-bs-auto-close="outside"
+                          >Blog</a
+                        >
+                        <ul class="dropdown-menu sub-menu shadow">
+                          <li><a class="nav-link" href="blog.html">Blog</a></li>
+                          <li>
+                            <a class="nav-link" href="blog-details.html"
+                              >Blog Details</a
+                            >
+                          </li>
+                        </ul>
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="nav-item dropdown main-navbar">
+                    <a
+                      class="nav-link dropdown-toggle"
+                      href="javascript:void(0)"
+                      data-bs-toggle="dropdown"
+                      data-bs-auto-close="outside"
+                      >Help</a
+                    >
+                    <ul class="dropdown-menu main-menu shadow">
+                      <li>
+                        <a class="nav-link" href="help-center.html"
+                          >Help Center</a
+                        >
+                      </li>
+                      <li>
+                        <a class="nav-link" href="help-center-category.html"
+                          >Help Category</a
+                        >
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+                <div class="right-area header-action d-flex align-items-center max-un">
+                  {% comment %} {% if request.user.is_authenticated %}
+                    <a href="/admin" class="cmdn-btn"> <small>Admin</small></a>
+                    <a href="{% url "user_auths:sign-out" %}" class="login cmn-btn">Sign out</a>
+                  {% else %}
+                    <a href="{% url "user_auths:sign-in" %}" class="login">Login</a>
+                    <a href="{% url "user_auths:sign-up" %}" class="cmn-btn"
+                      >Sign Up 
+                      &nbsp;
+                      <i class="fas fa-caret-right"></i>
+                    </a>
+                  {% endif %} {% endcomment %}
+                  {% if request.user.is_authenticated %}
+                    {% if request.user.is_superuser %}
+                      |&nbsp; <a href="/admin" class="cmdn-btn"> <small><b>Admin</b></small></a> &nbsp;|&nbsp;
+                    {% endif %}
+                    <a href="{% url "customer_dashboard" %}" class="cmdn-btn"> Dashboard</a>
+                    <a href="{% url "logout" %}" class="login cmn-btn">Sign out</a>
+                  {% else %}
+                    <a href="{% url "login" %}" class="login">Login</a>
+                    <a href="#" class="cmn-btn">Sign Up &nbsp; <i class="fas fa-caret-right"></i></a>
+                  {% endif %}
+                </div>
+              </div>
+            </nav>
+          </div>
+          {% comment %} Alert Start {% endcomment %}
+          {% if messages %}
+            {% for message in messages %}
+            <div class="alert alert-{{message.tags}} alert-dismissible fade show" role="alert">
+              <strong>{{message}}</strong> 
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div> 
+            {% endfor %}
+          {% endif %}
+          {% comment %} Alert End {% endcomment %}
+        </div>
+      </div>
+    </header>
+    <!-- header-section end -->
+
+    {% block content %}{% endblock content %}
+
+    <!--==================================================================-->
+    <script src="{% static 'assets/js/bootstrap.min.js' %}"></script>
+    {% comment %} <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script> {% endcomment %}
+
+    <script src="{% static 'assets/js/fontawesome.js' %}"></script>
+    {% comment %} <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/js/all.min.js" integrity="sha512-UwcC/iaz5ziHX7V6LjSKaXgCuRRqbTp1QHpbOJ4l1nw2/boCfZ2KlFIqBUA/uRVF0onbREnY9do8rM/uT/ilqw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script> {% endcomment %}
+    
+    <script src="{% static 'assets/js/jquery.min.js' %}"></script>
+    {% comment %} <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script> {% endcomment %}
+
+    <script src="{% static 'assets/js/jquery-ui.js' %}"></script>
+    {% comment %} <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.13.3/jquery-ui.min.js" integrity="sha512-Ww1y9OuQ2kehgVWSD/3nhgfrb424O3802QYP/A5gPXoM4+rRjiKrjHdGxQKrMGQykmsJ/86oGdHszfcVgUr4hA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script> {% endcomment %}
+
+    <script src="{% static 'assets/js/plugin/waypoint.min.js' %}"></script>
+    {% comment %} <script src="https://cdnjs.cloudflare.com/ajax/libs/waypoints/4.0.1/noframework.waypoints.min.js" integrity="sha512-fHXRw0CXruAoINU11+hgqYvY/PcsOWzmj0QmcSOtjlJcqITbPyypc8cYpidjPurWpCnlB8VKfRwx6PIpASCUkQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>     {% endcomment %}
+
+    <script src="{% static 'assets/js/plugin/counter.js' %}"></script>
+    {% comment %} <script src="https://cdnjs.cloudflare.com/ajax/libs/Counter-Up/1.0.0/jquery.counterup.js" integrity="sha512-+/4Q+xH9jXbMNJzNt2eMrYv/Zs2rzr4Bu2thfvzlshZBvH1g+VGP55W8b6xfku0c0KknE7qlbBPhDPrHFbgK4g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script> {% endcomment %}
+
+    <script src="{% static 'assets/js/plugin/jquery.magnific-popup.min.js' %}"></script>
+    {% comment %} <script src="https://cdnjs.cloudflare.com/ajax/libs/magnific-popup.js/1.1.0/jquery.magnific-popup.min.js" integrity="sha512-IsNh5E3eYy3tr/JiX2Yx4vsCujtkhwl7SLqgnwLNgf04Hrt9BT9SXlLlZlWx+OK4ndzAoALhsMNcCmkggjZB1w==" crossorigin="anonymous" referrerpolicy="no-referrer"></script> {% endcomment %}
+  
+    <script src="{% static 'assets/js/plugin/slick.js' %}"></script>
+    {% comment %} <script src="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.0/slick.min.js" integrity="sha512-XtmMtDEcNz2j7ekrtHvOVR4iwwaD6o/FUJe6+Zq+HgcCsk3kj4uSQQR8weQ2QVj1o0Pk6PwYLohm206ZzNfubg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script> {% endcomment %}
+    
+    <script src="{% static 'assets/js/plugin/wow.min.js' %}"></script>
+    {% comment %} <script src="https://cdnjs.cloudflare.com/ajax/libs/wow/1.1.2/wow.min.js" integrity="sha512-Eak/29OTpb36LLo2r47IpVzPBLXnAMPAVypbSZiZ4Qkf8p/7S/XRG5xp7OKWPPYfJT6metI+IORkR5G8F900+g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script> {% endcomment %}
+
+    <script src="{% static 'assets/js/plugin/jquery.nice-select.min.js' %}"></script>
+    <script src="{% static 'assets/js/plugin/plugin.js' %}"></script>
+    <script src="{% static 'assets/js/main.js' %}"></script>
+  </body>
+</html>

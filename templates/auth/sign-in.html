@@ -18,7 +18,7 @@
             <h5 class="sub-title">Welcome to KCoin</h5>
             <h2 class="title">Sign in now</h2>
             <p class="dont-acc">
-              Don't have an account yet? <a href="#">Sign Up</a>
+              Don't have an account yet? <a href="{% url "user_auths:sign-up" %}">Sign Up</a>
             </p>
             {% comment %} <div class="reg-google">
               <a href="javascript:void(0)"
@@ -42,12 +42,12 @@
             <div class="row">
               <div class="col-12">
                 <div class="single-input">
-                  <label for="phone_number">phone number</label>
-                  <input type="text" required id="phone_number" name="phone_number" placeholder="Enter your Email">
+                  <label for="">Email</label>
+                  <input type="text" required name="email" id="logemail" placeholder="Enter your Email">
                 </div>
                 <div class="single-input">
                   <label for="">Password</label>
-                    <input type="password" required  id="pin" name="pin" placeholder="Enter your Password/pin">
+                    <input type="password" required name="password" id="logemail" placeholder="Enter your Password">
                 </div>
                 <br>
                 <button class="cmn-btn w-100">Login</button>
@@ -62,34 +62,3 @@
 <!-- Login Reg end -->
 
 {% endblock content %}
-
-{% comment %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
-</head>
-<body>
-    <h2>Login</h2>
-    <form method="post">
-        {% csrf_token %}
-        <label for="phone_number">Phone Number:</label>
-        <input type="text" id="phone_number" name="phone_number" required>
-        <br>
-        <label for="pin">PIN:</label>
-        <input type="password" id="pin" name="pin" required>
-        <br>
-        <button type="submit">Login</button>
-    </form>
-
-    {% if messages %}
-        {% for message in messages %}
-            <p style="color:red;">{{ message }}</p>
-        {% endfor %}
-    {% endif %}
-</body>
-</html>
-
-{% endcomment %}

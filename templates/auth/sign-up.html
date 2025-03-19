@@ -1,0 +1,72 @@
+{% extends "partials/base.html" %} {% load static %} {% block content %}
+<!-- Login Reg start -->
+<section class="login-reg">
+  <div class="overlay pt-120">
+    <div class="container">
+      <div class="row align-items-center justify-content-center">
+        <div class="col-xl-6 order-xl-0 order-1">
+          <div class="sec-img d-rtl">
+            <img
+              src="{% static 'assets/images/signin-reg-bg.png' %}"
+              class="max-un user-reg-img"
+              alt="image"
+            />
+          </div>
+        </div>
+        <div class="col-xl-5">
+          <br><br>
+          <div class="section-text text-center">
+            <h2 class="title">Welcome to KCoin</h2>
+            <span class="dont-acc"> Already have an account? 
+              <a href="{% url "user_auths:sign-in" %}">Login</a>
+            </span>
+          </div>
+          <form method="POST">
+            {% csrf_token %}
+            <div class="row">
+              <div class="col-12">
+                <div class="single-input">
+                  <label for="">Username</label>
+                  {{ signup_form.username }}
+                </div>
+                <div class="single-input">
+                  <label for="">Email Address</label>
+                  {{ signup_form.email }}
+                </div>
+                <div class="row">
+                  <div class="col-6">
+                    <div class="single-input">
+                      <label for="">Password</label>
+                      <input type="password" name="{{ signup_form.password1.html_name }}" placeholder="Create a password">
+                      {{ signup_form.password1.errors }}
+                    </div>
+                  </div>
+                  <div class="col-6">
+                    <div class="single-input">
+                      <label for="">Confirm Password</label>
+                      <input type="password" name="{{ signup_form.password2.html_name }}" placeholder="Confirm your password">
+                      {{ signup_form.password2.errors }}
+                    </div>
+                  </div>
+                </div>
+                <button style="margin-top: 8px;" class="cmn-btn w-100">Sign Up</button>
+              </div>
+            </div>
+          </form>
+          {% comment %} <div class="section-text text-center">
+            <span class="or">Or continue with</span>
+            <div class="reg-google">
+              <a href="javascript:void(0)"
+                ><i class="fab fa-google"></i>Sign up with Google</a
+              >
+            </div>
+          </div> {% endcomment %}
+
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- Login Reg end -->
+
+{% endblock content %}
