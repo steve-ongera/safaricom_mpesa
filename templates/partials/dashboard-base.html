@@ -6,7 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-    <title>KCoin - Money Transfer and Online Payments Dashboard</title>
+    <title>Mpesa </title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
 
     <link rel="shortcut icon" href="{% static 'assets/images/fav.png'%}" type="image/x-icon"/>
@@ -176,21 +176,32 @@
                 <div class="single-item user-area">
                   <div class="profile-area d-flex align-items-center">
                     <span class="user-profile">
-                      <img style="width: 40px; height:40px; border-radius:50%; object-fit:cover;" src="{{kyc.image.url}}" alt="image">
-                    </span>
+                      {% if kyc.image %}
+                          <img style="width: 40px; height:40px; border-radius:50%; object-fit:cover;" src="{{ kyc.image.url }}" alt="image">
+                      {% else %}
+                          <img style="width: 40px; height:40px; border-radius:50%; object-fit:cover;" src="{% static 'assets/images/default-profile.png' %}" alt="default image">
+                      {% endif %}
+                  </span>
                     <i class="fa-solid fa-sort-down"></i>
                   </div>
                   <div class="main-area user-content">
                     <div class="head-area d-flex align-items-center">
-                      <div class="profile-img">
-                        <img style="width: 60px; height:60px; border-radius:50%; object-fit:cover;" src="{{kyc.image.url}}" alt="image">
-                      </div>
+                      
+
+                    <div class="profile-img">
+                        {% if kyc.image %}
+                            <img style="width: 60px; height:60px; border-radius:50%; object-fit:cover;" src="{{ kyc.image.url }}" alt="image">
+                        {% else %}
+                            <img style="width: 60px; height:60px; border-radius:50%; object-fit:cover;" src="{% static 'assets/images/default-profile.png' %}" alt="default image">
+                        {% endif %}
+                    </div>
+
                       <div class="profile-head">
-                        <a href=" {% url "account:account" %}">
-                          {% comment %} <h5>{{kyc.full_name|title}}</h5> {% endcomment %}
-                          <h5>{{kyc.user.username}}</h5>
+                        <a href="#">
+                          
+                          <h5>{{user.username}} </h5>
                         </a>
-                        <p class="wallet-id"><small> Acct No: {{account.account_number}}</small></p>
+                        <p class="wallet-id"><small> Acct No: {{user.mpesa_account.account_number}}</small></p>
                       </div>
                     </div>
                     <ul>
@@ -208,7 +219,7 @@
                         >
                       </li>
                       <li>
-                        <a href="{% url "user_auths:sign-out" %}"
+                        <a href="{% url "logout" %}"
                           ><i class="fas fa-sign-out"></i>Logout</a
                         >
                       </li>
@@ -222,31 +233,31 @@
                 <i class="fa-solid fa-xmark"></i>
               </div>
               <div class="sidebar-logo">
-                <a href="/">
+                <a href="">
                   <img src="{% static 'assets/images/logo.png' %}" alt="logo" id="logo-img">
                 </a>
               </div>
               <ul>
                 <li>
-                  <a href="{% url "account:dashboard" %}">
+                  <a href="#">
                     <img src="{% static 'assets1/images/bootstrap-icons-1.8.2/speedometer2.svg' %}" class="icon-spacing" alt="Speedometer Icon">
                     <span>Dashboard</span>
                   </a>
                 </li>
                 <li>
-                  <a href="{% url "core:transactions" %}">
+                  <a href="{% url "transaction_history" %}">
                     <img src="{% static 'assets1/images/bootstrap-icons-1.8.2/receipt.svg' %}" class="icon-spacing" alt="Receipt Icon">
                     <span>Transactions</span>
                   </a>
                 </li>
                 <li>
-                  <a href="{% url 'core:search-account' %}">
+                  <a href="{% url 'send_money' %}">
                     <img src="{% static 'assets1/images/bootstrap-icons-1.8.2/credit-card.svg' %}" class="icon-spacing" alt="Credit Card Icon">
                     <span>Transfer</span>
                   </a>
                 </li>
                 <li>
-                  <a href="{% url "core:request-search-users" %}">
+                  <a href="#">
                     <img src="{% static 'assets1/images/bootstrap-icons-1.8.2/arrow-down-circle.svg' %}" class="icon-spacing" alt="Arrow Down Circle Icon">
                     <span>Receive</span>
                   </a>
@@ -258,13 +269,13 @@
                   </a>
                 </li>
                 <li>
-                  <a href="#">
+                  <a href="{% url 'deposit_savings'%}">
                     <img src="{% static 'assets1/images/bootstrap-icons-1.8.2/wallet2.svg' %}" class="icon-spacing" alt="Wallet Icon">
                     <span>Deposit Money</span>
                   </a>
                 </li>
                 <li>
-                  <a href="#l">
+                  <a href="{% url 'search_agents'%}">
                     <img src="{% static 'assets1/images/bootstrap-icons-1.8.2/cash-stack.svg' %}" class="icon-spacing" alt="Cash Stack Icon">
                     <span>Withdraw Money</span>
                   </a>
@@ -272,19 +283,19 @@
               </ul>
               <ul class="bottom-item">
                 <li class="active">
-                  <a href="{% url 'account:account' %}">
+                  <a href="{% url 'savings_dashboard'%}">
                     <img src="{% static 'assets1/images/bootstrap-icons-1.8.2/person-circle.svg' %}" class="icon-spacing" alt="Person Circle Icon">
-                    <span>Account</span>
+                    <span>Savings</span>
                   </a>
                 </li>
                 <li>
-                  <a href="javascript:void(0)">
+                  <a href="{% url 'request_loan'%}">
                     <img src="{% static 'assets1/images/bootstrap-icons-1.8.2/life-preserver.svg' %}" class="icon-spacing" alt="Life Preserver Icon">
-                    <span>Support</span>
+                    <span>Loan</span>
                   </a>
                 </li>
                 <li>
-                  <a href="{% url "user_auths:sign-out" %}">
+                  <a href="{% url "logout" %}">
                     <img src="{% static 'assets1/images/bootstrap-icons-1.8.2/box-arrow-right.svg' %}" class="icon-spacing" alt="Box Arrow Right Icon">
                     <span>Quit</span>
                   </a>

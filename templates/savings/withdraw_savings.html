@@ -1,19 +1,40 @@
-{% extends "base.html" %}
+{% extends "partials/dashboard-base.html" %}
+{% load static %}
 {% block content %}
-<div class="container">
-    <h2>Withdraw Money</h2>
 
-    {% if messages %}
-        {% for message in messages %}
-            <p class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">{{ message }}</p>
-        {% endfor %}
-    {% endif %}
+<!-- Dashboard Section start -->
+<section class="dashboard-section body-collapse pay step">
+    <div class="overlay pt-120">
+        <div class="container-fruid">
+            <div class="main-content">
+                <div class="head-area d-flex align-items-center justify-content-between">
+                    <h4>Withdraw Money</h4>
+                </div>
 
-    <form method="post">
-        {% csrf_token %}
-        <label for="amount">Enter Amount:</label>
-        <input type="number" name="amount" step="0.01" required>
-        <button type="submit" class="btn btn-danger">Withdraw</button>
-    </form>
-</div>
+                <!-- Display Messages -->
+                {% if messages %}
+                    {% for message in messages %}
+                        <p class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">{{ message }}</p>
+                    {% endfor %}
+                {% endif %}
+
+                <form method="POST" class="flex-fill">
+                    {% csrf_token %}
+                    <div class="form-group d-flex align-items-center">
+                        <img src="{% static 'assets1/images/preloader.gif' %}" alt="icon" style="width: 30px; height: 30px; margin-right: 10px;"> 
+                        <input type="number" name="amount" id="amount" placeholder="Enter amount" required step="0.01" min="1">
+                    </div>
+
+                    <div class="mt-4">
+                        <button type="submit" class="cmn-btn">Withdraw</button>
+                        <a href="{% url 'customer_dashboard' %}" class="cmn-btn-alt ml-3">Back to Dashboard</a>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+</section>
+<!-- Dashboard Section end -->
+
 {% endblock %}

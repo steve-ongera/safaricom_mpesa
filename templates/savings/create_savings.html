@@ -1,21 +1,41 @@
-{% extends "base.html" %}
+{% extends "partials/dashboard-base.html" %}
+{% load static %}
 {% block content %}
-<div class="container">
-    <h2>Create a Savings Account</h2>
 
-    {% if messages %}
-        {% for message in messages %}
-            <p class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">{{ message }}</p>
-        {% endfor %}
-    {% endif %}
+<!-- Dashboard Section start -->
+<section class="dashboard-section body-collapse pay step">
+    <div class="overlay pt-120">
+        <div class="container-fruid">
+            <div class="main-content">
+                <div class="head-area d-flex align-items-center justify-content-between">
+                    <h4>Create a Savings Account</h4>
+                </div>
 
-    <form method="post">
-        {% csrf_token %}
-        
-        {{ form.as_p }}  {# Render the form fields dynamically #}
+                <!-- Display Messages -->
+                {% if messages %}
+                    {% for message in messages %}
+                        <p class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">{{ message }}</p>
+                    {% endfor %}
+                {% endif %}
 
-        <button type="submit" class="btn btn-primary">Create Savings Account</button>
-    </form>
-</div>
+                <form method="POST" class="flex-fill">
+                    {% csrf_token %}
+
+                    <!-- Dynamically render the form fields -->
+                    <div class="form-group">
+                        {{ form.as_p }}
+                    </div>
+
+                    <div class="mt-4">
+                        <button type="submit" class="cmn-btn">Create Savings Account</button>
+                        <a href="{% url 'customer_dashboard' %}" class="cmn-btn-alt ml-3">Back to Dashboard</a>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+</section>
+<!-- Dashboard Section end -->
+
 {% endblock %}
-

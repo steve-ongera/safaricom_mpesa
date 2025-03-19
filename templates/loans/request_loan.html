@@ -1,28 +1,46 @@
-{% extends 'base.html' %}
-
+{% extends "partials/dashboard-base.html" %}
+{% load static %}
 {% block content %}
-  <div class="container">
-    <h2>Request a Loan</h2>
-    
-    <!-- Show max loan eligibility -->
-    <p>Your maximum loan eligibility: <strong>KES {{ max_loan }}</strong></p>
 
-    <!-- Display Messages -->
-    {% if messages %}
-      <ul class="messages">
-        {% for message in messages %}
-          <li class="{{ message.tags }}">{{ message }}</li>
-        {% endfor %}
-      </ul>
-    {% endif %}
+<!-- Dashboard Section start -->
+<section class="dashboard-section body-collapse pay step">
+    <div class="overlay pt-120">
+        <div class="container-fruid">
+            <div class="main-content">
+                <div class="head-area d-flex align-items-center justify-content-between">
+                    <h4>Request a Loan</h4>
+                </div>
 
-    <form method="post">
-      {% csrf_token %}
-      
-      <label for="id_amount">Enter Loan Amount:</label>
-      <input type="number" name="amount" id="id_amount" step="0.01" required>
-      
-      <button type="submit">Request Loan</button>
-    </form>
-  </div>
+                <!-- Max loan eligibility -->
+                <div class="withdraw-details mb-4">
+                    <p>Your maximum loan eligibility: <strong>KES {{ max_loan }}</strong></p>
+                </div>
+
+                <!-- Display Messages -->
+                {% if messages %}
+                    <ul class="messages">
+                        {% for message in messages %}
+                            <li class="{{ message.tags }}">{{ message }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+
+                <form method="POST" class="flex-fill">
+                    {% csrf_token %}
+                    <div class="form-group d-flex align-items-center">
+                        <img src="{% static 'assets1/images/preloader.gif' %}" alt="icon" style="width: 30px; height: 30px; margin-right: 10px;"> 
+                        <input type="number" name="amount" id="id_amount" step="0.01" placeholder="Enter Loan Amount" required>
+                    </div>
+                    <div class="mt-4">
+                        <button type="submit" class="cmn-btn">Request Loan</button>
+                        <a href="{% url 'customer_dashboard' %}" class="cmn-btn-alt ml-3">Back to Dashboard</a>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+</section>
+<!-- Dashboard Section end -->
+
 {% endblock %}

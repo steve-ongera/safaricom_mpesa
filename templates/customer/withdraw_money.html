@@ -1,18 +1,37 @@
-{% extends "base.html" %}
+{% extends "partials/dashboard-base.html" %}
+{% load static %}
 {% block content %}
 
-<div class="container">
-    <h2>Withdraw Money</h2>
-    <p>Withdraw from: <strong>{{ agent.business_name }}</strong> ({{ agent.business_number }})</p>
+<!-- Dashboard Section start -->
+<section class="dashboard-section body-collapse pay step">
+    <div class="overlay pt-120">
+        <div class="container-fruid">
+            <div class="main-content">
+                <div class="head-area d-flex align-items-center justify-content-between">
+                    <h4>Withdraw Money</h4>
+                </div>
 
-    <form method="post">
-        {% csrf_token %}
-        <label for="amount">Enter Amount:</label>
-        <input type="number" name="amount" id="amount" class="form-control" required min="1">
-        <button type="submit" class="btn btn-primary mt-3">Withdraw</button>
-    </form>
+                <div class="withdraw-details mb-4">
+                    <p>Withdraw from: <strong>{{ agent.business_name }}</strong> ({{ agent.business_number }})</p>
+                </div>
 
-    <a href="{% url 'search_agents' %}" class="btn btn-secondary mt-2">Back to Search</a>
-</div>
+                <form method="POST" class="flex-fill">
+                    {% csrf_token %}
+                    <div class="form-group d-flex align-items-center">
+                        <img src="{% static 'assets1/images/preloader.gif' %}" alt="icon" style="width: 30px; height: 30px; margin-right: 10px;"> 
+                        <input type="number" name="amount" id="amount" placeholder="Enter amount" required min="1">
+                    </div>
+                    <div class="mt-4">
+                        <button type="submit" class="cmn-btn">Withdraw</button>
+                        <a href="{% url 'search_agents' %}" class="cmn-btn-alt ml-3">Back to Search</a>
+                    </div>
+                </form>
+                
+
+            </div>
+        </div>
+    </div>
+</section>
+<!-- Dashboard Section end -->
 
 {% endblock %}

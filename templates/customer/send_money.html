@@ -1,27 +1,71 @@
-{% extends "base.html" %}
+{% extends "partials/dashboard-base.html" %}
+{% load static %}
 {% block content %}
 
-<div class="container">
-    <h2>Send Money</h2>
+<!-- Dashboard Section start -->
+<section class="dashboard-section body-collapse pay step step-2">
+    <div class="overlay pt-120">
+        <div class="container-fruid">
+            <div class="main-content">
+                <div class="head-area d-flex align-items-center justify-content-between">
+                    <h4>Send Money</h4>
+                </div>
 
-    <form method="post" action="">
-        {% csrf_token %}
+                <div class="choose-recipient">
+                    <div class="step-area">
+                        <span class="mdr">mpesa balance: ksh{{ user.mpesa_account.balance}}</span>
+                        <h5>Enter Recipient & Amount</h5>
+                    </div>
 
-        <div class="form-group">
-            <label for="phone_number">Recipient Phone Number:</label>
-            <input type="text" id="phone_number" name="phone_number" class="form-control" placeholder="Enter recipient phone number" required>
-            <div id="recipient_info" class="mt-2"></div>  <!-- This will show the recipient name -->
+                    <form method="post" action="">
+                        {% csrf_token %}
+
+                        <div class="send-banance">
+                            <span class="mdr">Recipient Phone Number</span>
+                            <div class="input-area">
+                                <input type="text" id="phone_number" name="phone_number" class="mdr" placeholder="Enter recipient phone number" required>
+                            </div>
+                            <div id="recipient_info" class="mt-2"></div> <!-- Recipient Name will display here -->
+                            <br>
+
+                            <span class="mdr">Amount</span>
+                            <div class="input-area">
+                                <input type="number" id="amount" name="amount" class="mdr" placeholder="Enter amount" required>
+                                <select name="currency" required>
+                                    <option value="KSH" selected>KSH</option>
+                                    
+                                </select>
+                            </div>
+                            
+                        </div>
+
+                        <ul class="total-fees">
+                            <li>Convenience Fee</li>
+                            <li>Temporarily Free</li>
+                        </ul>
+                        <ul class="total-fees pay">
+                            <li>
+                                <h5>Total To Pay</h5>
+                            </li>
+                            <li>
+                                <h5 id="total-to-pay">KSH 0.00</h5>
+                            </li>
+                        </ul>
+
+                        <div class="footer-area mt-40">
+                            <a href="#">Previous Step</a>
+                            <button type="submit" style="padding: 10px 30px; border-radius:19px; background: #d85a45; color: #fff;" class="active">Send Money</button>
+                        </div>
+                    </form>
+                </div>
+
+            </div>
         </div>
+    </div>
+</section>
+<!-- Dashboard Section end -->
 
-        <div class="form-group">
-            <label for="amount">Amount:</label>
-            <input type="number" id="amount" name="amount" class="form-control" placeholder="Enter amount" required>
-        </div>
-
-        <button type="submit" class="btn btn-primary mt-2">Send Money</button>
-    </form>
-</div>
-
+<!-- Existing JS remains -->
 <script>
     document.getElementById("phone_number").addEventListener("input", function() {
         let phoneNumber = this.value.trim();

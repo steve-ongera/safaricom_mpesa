@@ -1,13 +1,34 @@
-{% extends "base.html" %}
+{% extends "partials/dashboard-base.html" %}
+{% load static %}
 {% block content %}
 
-<div class="container">
-    <h2>Your Account Balance</h2>
-    {% if balance is not None %}
-        <p class="alert alert-success"><strong>Balance: KES {{ balance }}</strong></p>
-    {% else %}
-        <p class="alert alert-danger">You do not have an active M-Pesa account.</p>
-    {% endif %}
-</div>
+<!-- Dashboard Section start -->
+<section class="dashboard-section body-collapse pay step">
+    <div class="overlay pt-120">
+        <div class="container-fruid">
+            <div class="main-content">
+                <div class="head-area d-flex align-items-center justify-content-between">
+                    <h4>Your Account Balance</h4>
+                </div>
+
+                <div class="balance-details mt-4">
+                    {% if balance is not None %}
+                        <p class="alert alert-success">
+                            <strong>Balance: KES {{ balance }}</strong>
+                        </p>
+                    {% else %}
+                        <p class="alert alert-danger">You do not have an active M-Pesa account.</p>
+                    {% endif %}
+                </div>
+
+                <div class="mt-4">
+                    <a href="{% url 'customer_dashboard' %}" class="cmn-btn-alt">Back to Dashboard</a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</section>
+<!-- Dashboard Section end -->
 
 {% endblock %}

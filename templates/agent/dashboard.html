@@ -1,78 +1,85 @@
-{% extends 'base.html' %}
-
+{% extends "partials/dashboard-base.html" %}
+{% load static %}
 {% block content %}
-<div class="container mt-4">
-    <div class="row">
-        <div class="col-md-12">
-            <div class="card">
-                <div class="card-header bg-primary text-white">
+
+<!-- Dashboard Section start -->
+<section class="dashboard-section body-collapse pay step">
+    <div class="overlay pt-120">
+        <div class="container-fruid">
+            <div class="main-content">
+                <div class="head-area d-flex align-items-center justify-content-between">
                     <h4>Agent Dashboard</h4>
                 </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="card mb-3">
-                                <div class="card-body">
-                                    <h5 class="card-title">Agent Information</h5>
-                                    <p><strong>Business Name:</strong> {{ agent.business_name }}</p>
-                                    <p><strong>Business Number:</strong> {{ agent.business_number }}</p>
-                                    <p><strong>Location:</strong> {{ agent.location }}</p>
-                                    <p><strong>Float Balance:</strong> KES {{ agent.float_balance }}</p>
-                                </div>
+
+                <div class="row mt-4">
+                    <!-- Agent Information -->
+                    <div class="col-md-6">
+                        <div class="single-feature mb-4">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <h5>Agent Information</h5>
                             </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="card">
-                                <div class="card-body">
-                                    <h5 class="card-title">Quick Actions</h5>
-                                    <a href="{% url 'register_customer' %}" class="btn btn-success btn-block mb-2">Register New Customer</a>
-                                    <a href="{% url 'agent_transactions' %}" class="btn btn-info btn-block mb-2">View Transactions</a>
-                                    <a href="{% url 'agent_float' %}" class="btn btn-warning btn-block">Manage Float</a>
-                                </div>
-                            </div>
+                            <p><strong>Business Name:</strong> {{ agent.business_name }}</p>
+                            <p><strong>Business Number:</strong> {{ agent.business_number }}</p>
+                            <p><strong>Location:</strong> {{ agent.location }}</p>
+                            <p><strong>Float Balance:</strong> KES {{ agent.float_balance }}</p>
                         </div>
                     </div>
-                    
-                    <div class="row mt-4">
-                        <div class="col-md-12">
-                            <div class="card">
-                                <div class="card-header">
-                                    <h5>Recent Registrations</h5>
-                                </div>
-                                <div class="card-body">
-                                    {% if recent_accounts %}
-                                    <div class="table-responsive">
-                                        <table class="table table-striped">
-                                            <thead>
-                                                <tr>
-                                                    <th>Date</th>
-                                                    <th>Customer Name</th>
-                                                    <th>Phone Number</th>
-                                                    <th>Account Number</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {% for account in recent_accounts %}
-                                                <tr>
-                                                    <td>{{ account.created_at|date:"d M Y, H:i" }}</td>
-                                                    <td>{{ account.user.get_full_name }}</td>
-                                                    <td>{{ account.user.phone_number }}</td>
-                                                    <td>{{ account.account_number }}</td>
-                                                </tr>
-                                                {% endfor %}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                    {% else %}
-                                    <p class="text-muted">No recent registrations found.</p>
-                                    {% endif %}
-                                </div>
+
+                    <!-- Quick Actions -->
+                    <div class="col-md-6">
+                        <div class="single-feature mb-4">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <h5>Quick Actions</h5>
                             </div>
+                            <a href="{% url 'register_customer' %}" class="cmn-btn mb-3 w-100">Register New Customer</a>
+                            <a href="{% url 'agent_transactions' %}" class="cmn-btn-alt mb-3 w-100">View Transactions</a>
+                            <a href="{% url 'agent_float' %}" class="cmn-btn mb-3 w-100">Manage Float</a>
                         </div>
                     </div>
                 </div>
+
+                <!-- Recent Registrations -->
+                <div class="row mt-4">
+                    <div class="col-md-12">
+                        <div class="single-feature">
+                            <div class="d-flex align-items-center justify-content-between mb-3">
+                                <h5>Recent Registrations</h5>
+                            </div>
+
+                            {% if recent_accounts %}
+                                <div class="table-responsive">
+                                    <table class="table table-striped text-white">
+                                        <thead>
+                                            <tr>
+                                                <th>Date</th>
+                                                <th>Customer Name</th>
+                                                <th>Phone Number</th>
+                                                <th>Account Number</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for account in recent_accounts %}
+                                            <tr>
+                                                <td>{{ account.created_at|date:"d M Y, H:i" }}</td>
+                                                <td>{{ account.user.get_full_name }}</td>
+                                                <td>{{ account.user.phone_number }}</td>
+                                                <td>{{ account.account_number }}</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% else %}
+                                <p class="text-muted">No recent registrations found.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
-</div>
+</section>
+<!-- Dashboard Section end -->
+
 {% endblock %}
