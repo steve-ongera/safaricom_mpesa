@@ -572,15 +572,53 @@ def user_logout(request):
 
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
+from django.db import models
 
 @login_required
 def customer_dashboard(request):
     # Get the user's M-Pesa account (if exists)
     mpesa_account = MPesaAccount.objects.select_related("user").filter(user=request.user).first()
-
+    
+    # Initialize empty lists
+    latest_transactions = []
+    transaction_partners = []
+    
+    if mpesa_account:
+        # Get the latest transactions where user is either sender or receiver
+        # and transaction type is TRANSFER (money sent to or received from others)
+        latest_transactions = Transaction.objects.filter(
+            models.Q(sender=mpesa_account) | models.Q(receiver=mpesa_account),
+            transaction_type='TRANSFER'  # Only include transfers between users
+        ).order_by('-timestamp')[:6]
+        
+        # For each transaction, get the other party (the person you transacted with)
+        for transaction in latest_transactions:
+            partner = None
+            transaction_type = ""
+            
+            if transaction.sender == mpesa_account:
+                # You sent money
+                partner = transaction.receiver
+                transaction_type = "Sent"
+                transaction.is_outgoing = True  # Add flag for template
+            else:
+                # You received money
+                partner = transaction.sender
+                transaction_type = "Received"
+                transaction.is_outgoing = False  # Add flag for template
+                
+            if partner:
+                transaction_partners.append({
+                    'transaction': transaction,
+                    'partner': partner,
+                    'type': transaction_type
+                })
+    
     context = {
         "user": request.user,
         "mpesa_account": mpesa_account,
+        "latest_transactions": latest_transactions,
+        "transaction_partners": transaction_partners[:6]  # Limit to 6 items
     }
     return render(request, "customer/customer_dashboard.html", context)
 
