@@ -6,10 +6,10 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-    <title>Mpesa </title>
+    <title>Kpesa | Money Transfer and Online Payments Dashboard </title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
 
-    <link rel="shortcut icon" href="{% static 'assets/images/fav.png'%}" type="image/x-icon"/>
+    <link rel="shortcut icon" href="{% static 'assets/images/kpesa_logo.png'%}" type="image/x-icon"/>
     <link rel="stylesheet" href="{% static 'assets1/css/bootstrap.min.css' %}"/>
     <link rel="stylesheet" href="{% static 'assets1/css/fontawesome.min.css' %}"/>
     <link rel="stylesheet" href="{% static 'assets1/css/jquery-ui.css' %}" />
@@ -239,7 +239,7 @@
               </div>
               <ul>
                 <li>
-                  <a href="#">
+                  <a href="{%  url 'customer_dashboard'%}">
                     <img src="{% static 'assets1/images/bootstrap-icons-1.8.2/speedometer2.svg' %}" class="icon-spacing" alt="Speedometer Icon">
                     <span>Dashboard</span>
                   </a>
@@ -253,19 +253,19 @@
                 <li>
                   <a href="{% url 'send_money' %}">
                     <img src="{% static 'assets1/images/bootstrap-icons-1.8.2/credit-card.svg' %}" class="icon-spacing" alt="Credit Card Icon">
-                    <span>Transfer</span>
+                    <span>Send Money</span>
                   </a>
                 </li>
                 <li>
-                  <a href="#">
+                  <a href="{% url 'repay_loan'%}">
                     <img src="{% static 'assets1/images/bootstrap-icons-1.8.2/arrow-down-circle.svg' %}" class="icon-spacing" alt="Arrow Down Circle Icon">
-                    <span>Receive</span>
+                    <span>Repay Loan</span>
                   </a>
                 </li>
                 <li>
-                  <a href="#">
+                  <a href="{% url 'request_loan'%}">
                     <img src="{% static 'assets1/images/bootstrap-icons-1.8.2/person.svg' %}" class="icon-spacing" alt="Person Icon">
-                    <span>Recipients</span>
+                    <span>Request Loan</span>
                   </a>
                 </li>
                 <li>
@@ -289,9 +289,9 @@
                   </a>
                 </li>
                 <li>
-                  <a href="{% url 'request_loan'%}">
+                  <a href="{% url 'check_balance'%}">
                     <img src="{% static 'assets1/images/bootstrap-icons-1.8.2/life-preserver.svg' %}" class="icon-spacing" alt="Life Preserver Icon">
-                    <span>Loan</span>
+                    <span>Check Balance</span>
                   </a>
                 </li>
                 <li>
