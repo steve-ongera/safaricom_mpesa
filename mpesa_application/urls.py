@@ -21,7 +21,7 @@ urlpatterns = [
     path('logout/', views.user_logout, name='logout'),
     path("customer_dashboard/", views.customer_dashboard, name="customer_dashboard"),
     path('search-agent/', views.search_agents, name='search_agents'),
-    path('withdraw/<int:agent_id>/', views.withdraw_money, name='withdraw_money'),
+    path('withdraw-from-agent/<int:agent_id>/', views.withdraw_money, name='withdraw_money'),
     path('send-money/', views.send_money, name='send_money'),
     path('check-recipient/', views.check_recipient, name='check_recipient'),
     path("check-balance/", views.check_balance, name="check_balance"),
@@ -32,7 +32,7 @@ urlpatterns = [
     path('create-savings/', views.create_savings_account, name='create_savings_account'),
     path('savings-dashboard/', views.savings_dashboard, name='savings_dashboard'),
     path('deposit/', views.deposit_savings, name='deposit_savings'),
-    path('withdraw/', views.withdraw_savings, name='withdraw_savings'),
+    path('withdraw-from-saving-account/', views.withdraw_savings, name='withdraw_savings'),
 
     #loans
     path('request-loan/', views.request_loan, name='request_loan'),

@@ -606,7 +606,7 @@ def search_agents(request):
                     'id': agent.id, 
                     'business_name': agent.business_name, 
                     'business_number': agent.business_number,
-                    'withdraw_url': f"/withdraw/{agent.id}/"  # Link to withdraw money
+                    'withdraw_url': f"/withdraw-from-agent/{agent.id}/"  # Link to withdraw money
                 }
                 for agent in agents
             ]
